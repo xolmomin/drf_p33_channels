@@ -1,0 +1,10 @@
+gunicorn
+uvicorn
+daphne
+
+
+
+
+1. umumiy gruppa
+2. private
+3. private, group
