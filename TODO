@@ -3,8 +3,25 @@ uvicorn
 daphne
 
 
-
+10.30.12.115
+ws://localhost:8000/chat/xolmomin
 
 1. umumiy gruppa
+    1.1 gayrat is online, gayrat is offline
+    1.2 Message, Group modellarini yozish
+    1.3 token qoshish
 2. private
 3. private, group
+
+
+
+postman
+https://websocketking.com
+
+
+
+keyingi mavzuda
+1. websocket jwt auth
+2. 1-1
+3. pg, redis
+4.
