@@ -5,6 +5,10 @@ from django.db.models.fields import CharField
 class User(AbstractUser):
     phone = CharField(max_length=15, unique=True)
     username = CharField(max_length=33, null=True, blank=True, unique=True)
-    first_name = CharField(max_length=65)
+    first_name = CharField(max_length=65, blank=True)
     last_name = CharField(max_length=150, null=True, blank=True)
     bio = CharField(max_length=70, null=True, blank=True)
+    password = None
+    email = None
+
+    USERNAME_FIELD = 'phone'

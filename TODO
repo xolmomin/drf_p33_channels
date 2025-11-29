@@ -4,25 +4,37 @@ daphne
 
 
 10.30.12.115
-ws://localhost:8000/chat/xolmomin
-
-1. umumiy gruppa
-    1.1 gayrat is online, gayrat is offline
-    1.2 Message, Group modellarini yozish
-    1.3 token qoshish
-2. private
-3. private, group
+ws://localhost:8000/chat
 
 
+# Homework
+1. swaggerda qulfchalar
+2. user ga rasmga qoshish
+3. /api/v1/profile user malumotlarini update qilish
+4. refresh token apisini chiqarish kk
 
-postman
-https://websocketking.com
+5. /api/v1/chats
+[
+    {
+        'id': 2,
+        'full_name': 'Gayrat Botirov',
+        'image': 'rasm url',
+        'last_message': 'oxirgi xabar bu',
+        'last_message_created_at': ''
+    }
+]
+6. /api/v1/delete-account (POST)
 
-homework
-1. register api (jwt)
 
-keyingi mavzuda
-1. websocket jwt auth
-2. 1-1
-3. pg, redis
-4.
+1010 xolmomin 2
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE2MzQ1LCJpYXQiOjE3NjQzOTQ3NDUsImp0aSI6IjI3ZWQxZTQ5MjAxZDQwODk4YzBmNDFhODBkZDIyOGE1IiwidXNlcl9pZCI6IjIifQ.2ndWtbO7QXu897jscd0M9c3Hw2HGiHjZSltMDHtJJGs
+
+
+1011 botir 3
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE3ODk3LCJpYXQiOjE3NjQzOTYyOTcsImp0aSI6ImUyNmZmMWFiNzQ4ODRlZDI4OWQ5OWE1MDRlMjRkYWNhIiwidXNlcl9pZCI6IjMifQ.bP6FPvpheFYN4NOze8oomn3N12t9k_J1JhX1faqjJKM
+
+
+5555 shokir 4
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE4MjIyLCJpYXQiOjE3NjQzOTY2MjIsImp0aSI6ImMwZmJkZDEyNTBmZjRmNTg4OTg5NmI3OTU4NjQ5YzVkIiwidXNlcl9pZCI6IjQifQ.wRS7gBV24xSozala0vCD-6p4qDBamv-u_Q-CRlHC41E
+
+

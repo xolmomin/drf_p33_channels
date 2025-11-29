@@ -1,4 +1,8 @@
-from django.shortcuts import render
+from django.urls import path
 
-# Create your views here.
+from apps.views import SendCodeAPIView, VerifyCodeAPIView
 
+urlpatterns = [
+    path('auth/send-code', SendCodeAPIView.as_view(), name='send_code'),
+    path('auth/verify-code', VerifyCodeAPIView.as_view(), name='verify_code'),
+]
