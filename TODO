@@ -25,6 +25,11 @@ ws://localhost:8000/chat
 ]
 6. /api/v1/delete-account (POST)
 
+keyingi darsda
+1. 1-1, group
+2. is_read, is_edited
+3. online statusni olish
+4. front
 
 1010 xolmomin 2
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE2MzQ1LCJpYXQiOjE3NjQzOTQ3NDUsImp0aSI6IjI3ZWQxZTQ5MjAxZDQwODk4YzBmNDFhODBkZDIyOGE1IiwidXNlcl9pZCI6IjIifQ.2ndWtbO7QXu897jscd0M9c3Hw2HGiHjZSltMDHtJJGs
