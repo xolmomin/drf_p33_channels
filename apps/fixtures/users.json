@@ -3,7 +3,7 @@
     "model": "apps.user",
     "pk": 1,
     "fields": {
-      "phone": "10000000001",
+      "phone": "998901001001",
       "username": "user1",
       "first_name": "User1",
       "last_name": "Test1",
@@ -14,7 +14,7 @@
     "model": "apps.user",
     "pk": 2,
     "fields": {
-      "phone": "10000000002",
+      "phone": "998901001002",
       "username": "user2",
       "first_name": "User2",
       "last_name": "Test2",
@@ -25,7 +25,7 @@
     "model": "apps.user",
     "pk": 3,
     "fields": {
-      "phone": "10000000003",
+      "phone": "998901001003",
       "username": "user3",
       "first_name": "User3",
       "last_name": "Test3",
@@ -36,7 +36,7 @@
     "model": "apps.user",
     "pk": 4,
     "fields": {
-      "phone": "10000000004",
+      "phone": "998901001004",
       "username": "user4",
       "first_name": "User4",
       "last_name": "Test4",
@@ -47,7 +47,7 @@
     "model": "apps.user",
     "pk": 5,
     "fields": {
-      "phone": "10000000005",
+      "phone": "998901001005",
       "username": "user5",
       "first_name": "User5",
       "last_name": "Test5",
@@ -58,7 +58,7 @@
     "model": "apps.user",
     "pk": 6,
     "fields": {
-      "phone": "10000000006",
+      "phone": "998901001006",
       "username": "user6",
       "first_name": "User6",
       "last_name": "Test6",
@@ -69,7 +69,7 @@
     "model": "apps.user",
     "pk": 7,
     "fields": {
-      "phone": "10000000007",
+      "phone": "998901001007",
       "username": "user7",
       "first_name": "User7",
       "last_name": "Test7",
@@ -80,7 +80,7 @@
     "model": "apps.user",
     "pk": 8,
     "fields": {
-      "phone": "10000000008",
+      "phone": "998901001008",
       "username": "user8",
       "first_name": "User8",
       "last_name": "Test8",
@@ -91,7 +91,7 @@
     "model": "apps.user",
     "pk": 9,
     "fields": {
-      "phone": "10000000009",
+      "phone": "998901001009",
       "username": "user9",
       "first_name": "User9",
       "last_name": "Test9",
@@ -102,7 +102,7 @@
     "model": "apps.user",
     "pk": 10,
     "fields": {
-      "phone": "10000000010",
+      "phone": "998901001110",
       "username": "user10",
       "first_name": "User10",
       "last_name": "Test10",
@@ -113,7 +113,7 @@
     "model": "apps.user",
     "pk": 11,
     "fields": {
-      "phone": "10000000011",
+      "phone": "998901001011",
       "username": "user11",
       "first_name": "User11",
       "last_name": "Test11",
@@ -124,7 +124,7 @@
     "model": "apps.user",
     "pk": 12,
     "fields": {
-      "phone": "10000000012",
+      "phone": "998901001012",
       "username": "user12",
       "first_name": "User12",
       "last_name": "Test12",
@@ -135,7 +135,7 @@
     "model": "apps.user",
     "pk": 13,
     "fields": {
-      "phone": "10000000013",
+      "phone": "998901001013",
       "username": "user13",
       "first_name": "User13",
       "last_name": "Test13",
@@ -146,7 +146,7 @@
     "model": "apps.user",
     "pk": 14,
     "fields": {
-      "phone": "10000000014",
+      "phone": "998901001014",
       "username": "user14",
       "first_name": "User14",
       "last_name": "Test14",
@@ -157,7 +157,7 @@
     "model": "apps.user",
     "pk": 15,
     "fields": {
-      "phone": "10000000015",
+      "phone": "998901001015",
       "username": "user15",
       "first_name": "User15",
       "last_name": "Test15",
@@ -168,7 +168,7 @@
     "model": "apps.user",
     "pk": 16,
     "fields": {
-      "phone": "10000000016",
+      "phone": "998901001016",
       "username": "user16",
       "first_name": "User16",
       "last_name": "Test16",
@@ -179,7 +179,7 @@
     "model": "apps.user",
     "pk": 17,
     "fields": {
-      "phone": "10000000017",
+      "phone": "998901001017",
       "username": "user17",
       "first_name": "User17",
       "last_name": "Test17",
@@ -190,7 +190,7 @@
     "model": "apps.user",
     "pk": 18,
     "fields": {
-      "phone": "10000000018",
+      "phone": "998901001018",
       "username": "user18",
       "first_name": "User18",
       "last_name": "Test18",
@@ -201,7 +201,7 @@
     "model": "apps.user",
     "pk": 19,
     "fields": {
-      "phone": "10000000019",
+      "phone": "998901001019",
       "username": "user19",
       "first_name": "User19",
       "last_name": "Test19",
@@ -212,7 +212,7 @@
     "model": "apps.user",
     "pk": 20,
     "fields": {
-      "phone": "10000000020",
+      "phone": "998901001020",
       "username": "user20",
       "first_name": "User20",
       "last_name": "Test20",

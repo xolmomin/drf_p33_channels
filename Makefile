@@ -4,3 +4,6 @@ mig:
 
 loaddata:
 	python3 manage.py loaddata users chats messages
+
+front:
+	python3 -m http.server 3000

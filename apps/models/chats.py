@@ -1,4 +1,4 @@
-from django.db.models import TextField, ForeignKey, SET_NULL, ManyToManyField, CASCADE
+from django.db.models import TextField, ForeignKey, SET_NULL, ManyToManyField, CASCADE, ImageField
 from django.db.models.enums import TextChoices
 from django.db.models.fields import CharField, BooleanField
 
@@ -11,8 +11,17 @@ class Chat(CreatedBaseModel):
         GROUP = 'group', 'Group'
 
     name = CharField(max_length=70)
+    image = ImageField(upload_to='group/images/%Y/%m/%d', null=True, blank=True)
     type = CharField(max_length=10, choices=Type.choices, default=Type.PRIVATE)
     members = ManyToManyField('apps.User', related_name='chats')
+
+    def create_group(self, user):
+        obj, created = self.__class__.objects.get_or_create(members=user, type=self.Type.GROUP)
+        return obj, created
+
+    def create_private(self, user):
+        obj, created = self.__class__.objects.get_or_create(members=user, type=self.Type.PRIVATE)
+        return obj, created
 
     @property
     def is_group(self):

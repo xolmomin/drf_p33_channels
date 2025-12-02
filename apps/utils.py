@@ -40,6 +40,6 @@ def check_phone(phone: str, code: int):
 
 def normalize_phone(value):
     digits = re.findall(r'\d', value)
-    if len(digits) < 9:
+    if len(digits) != 12:
         raise ValidationError('Phone number must be at least 9 digits')
     return ''.join(digits)

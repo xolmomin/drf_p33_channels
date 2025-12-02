@@ -20,13 +20,21 @@ ws://localhost:8000/chat
 [
     {
         'id': 2,
-        'full_name': 'Gayrat Botirov',
+        'name': 'Gayrat Botirov',
         'image': 'rasm url',
         'last_message': 'oxirgi xabar bu',
         'last_message_created_at': ''
     }
 ]
 6.+ /api/v1/delete-account
+7. - `GET /api/v1/chats/{id}/messages` - Get messages (paginated) apisini chiqarish
+8. [front] chatga kirganda chatga tegishli bolgan message larni chiqarsin
+9. adminkada chatni chiqarish kk (list display id, type, members, member_count
+agar private bolsa 998901001111 <-> 998901005555
+agar group bolsa 998901001111
+                 998901001112
+                 998901001111
+10. - `GET /api/v1/users` - List users apisini chiqarish, api faqat search yozilganda ishlashi kerak (search username boyicha) max 10ta chiqsin
 
 keyingi darsda
 1. 1-1, group
@@ -65,6 +73,7 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY
 - `GET /api/v1/chats` - user's all chats
 - `POST /api/v1/chats` - Create chat room (private, group)
 - `GET /api/v1/chats/{id}/messages` - Get messages (paginated)
+- `GET /api/users/` - List users
 
 
 

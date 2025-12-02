@@ -4,7 +4,7 @@ from rest_framework.generics import UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from apps.models import User
 from apps.serializers import UserProfileUpdateModelSerializer, SendCodeSerializer, VerifyCodeSerializer
@@ -49,6 +49,11 @@ class SendCodeAPIView(APIView):
 
 @extend_schema(tags=['Auth & Users'])
 class CustomTokenRefreshView(TokenRefreshView):
+    pass
+
+
+@extend_schema(tags=['Auth & Users'])
+class CustomTokenVerifyView(TokenVerifyView):
     pass
 
 

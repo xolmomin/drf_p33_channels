@@ -3,7 +3,7 @@ from rest_framework.generics import ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from apps.models import Chat
-from apps.serializers.chats import ChatListModelSerializer
+from apps.serializers.chats import ChatListModelSerializer, ChatCreateModelSerializer
 
 
 @extend_schema(tags=['Chats'])
@@ -11,6 +11,11 @@ class ChatListCreateAPIView(ListCreateAPIView):
     queryset = Chat.objects.all()
     serializer_class = ChatListModelSerializer
     permission_classes = IsAuthenticated,
+
+    def get_serializer_class(self):
+        if self.request.method == 'post':
+            self.serializer_class = ChatCreateModelSerializer
+        return super().get_serializer_class()
 
     def get_queryset(self):
         qs = super().get_queryset()
