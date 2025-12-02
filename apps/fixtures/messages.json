@@ -1,0 +1,197 @@
+[
+  {
+    "model": "apps.message",
+    "pk": 1,
+    "fields": {
+      "message": "Hello user2",
+      "chat": 1,
+      "from_user": 1,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 2,
+    "fields": {
+      "message": "Hi user1",
+      "chat": 1,
+      "from_user": 2,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 3,
+    "fields": {
+      "message": "What's up?",
+      "chat": 2,
+      "from_user": 3,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 4,
+    "fields": {
+      "message": "All good!",
+      "chat": 2,
+      "from_user": 4,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 5,
+    "fields": {
+      "message": "Welcome to the group",
+      "chat": 3,
+      "from_user": 1,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 6,
+    "fields": {
+      "message": "Hello everyone!",
+      "chat": 3,
+      "from_user": 3,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 7,
+    "fields": {
+      "message": "Nice to be here",
+      "chat": 3,
+      "from_user": 5,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 8,
+    "fields": {
+      "message": "Group 2 start",
+      "chat": 4,
+      "from_user": 6,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 9,
+    "fields": {
+      "message": "Hi all",
+      "chat": 4,
+      "from_user": 8,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 10,
+    "fields": {
+      "message": "Ping!",
+      "chat": 4,
+      "from_user": 10,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 11,
+    "fields": {
+      "message": "Welcome!",
+      "chat": 5,
+      "from_user": 11,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 12,
+    "fields": {
+      "message": "Hello group 3",
+      "chat": 5,
+      "from_user": 14,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 13,
+    "fields": {
+      "message": "Let's work together",
+      "chat": 5,
+      "from_user": 17,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 14,
+    "fields": {
+      "message": "Another message",
+      "chat": 3,
+      "from_user": 2,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "apps.message",
+    "pk": 15,
+    "fields": {
+      "message": "Finishing message",
+      "chat": 4,
+      "from_user": 9,
+      "is_read": false,
+      "is_edited": false,
+      "created_at": "2024-01-01T10:00:00Z",
+      "updated_at": "2024-01-01T10:00:00Z"
+    }
+  }
+]

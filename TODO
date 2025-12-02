@@ -6,12 +6,15 @@ daphne
 10.30.12.115
 ws://localhost:8000/chat
 
+#NEXT TASK
+1. adminkadan phone ga sms yuborish orqali kirish (no password)
+2.
 
 # Homework
-1. swaggerda qulfchalar
-2. user ga rasmga qoshish
-3. /api/v1/profile user malumotlarini update qilish
-4. refresh token apisini chiqarish kk
+1.+ swaggerda qulfchalar
+2.+ user ga rasmga qoshish
+3.+ /api/v1/profile user malumotlarini update qilish
+4.+ refresh token apisini chiqarish kk
 
 5. /api/v1/chats
 [
@@ -23,23 +26,62 @@ ws://localhost:8000/chat
         'last_message_created_at': ''
     }
 ]
-6. /api/v1/delete-account (POST)
+6.+ /api/v1/delete-account
 
 keyingi darsda
 1. 1-1, group
-2. is_read, is_edited
-3. online statusni olish
 4. front
 
-1010 xolmomin 2
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE2MzQ1LCJpYXQiOjE3NjQzOTQ3NDUsImp0aSI6IjI3ZWQxZTQ5MjAxZDQwODk4YzBmNDFhODBkZDIyOGE1IiwidXNlcl9pZCI6IjIifQ.2ndWtbO7QXu897jscd0M9c3Hw2HGiHjZSltMDHtJJGs
+2. is_read, is_edited
+3. online statusni olish
 
 
-1011 botir 3
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE3ODk3LCJpYXQiOjE3NjQzOTYyOTcsImp0aSI6ImUyNmZmMWFiNzQ4ODRlZDI4OWQ5OWE1MDRlMjRkYWNhIiwidXNlcl9pZCI6IjMifQ.bP6FPvpheFYN4NOze8oomn3N12t9k_J1JhX1faqjJKM
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMDk3LCJpYXQiOjE3NjQ0NDA0OTcsImp0aSI6IjY5MjhiMTRkNjk3ZDQ5NzBiYTY3NTQwYzNlZjllNjQ5IiwidXNlcl9pZCI6IjEifQ.Ma4uAk1Lyj-QJEHZEdaZGt1rU4KU7uWtlJxTrRkZick
+1 - 1010
 
 
-5555 shokir 4
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDE4MjIyLCJpYXQiOjE3NjQzOTY2MjIsImp0aSI6ImMwZmJkZDEyNTBmZjRmNTg4OTg5NmI3OTU4NjQ5YzVkIiwidXNlcl9pZCI6IjQifQ.wRS7gBV24xSozala0vCD-6p4qDBamv-u_Q-CRlHC41E
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMTMzLCJpYXQiOjE3NjQ0NDA1MzMsImp0aSI6IjY4MDgxMmJhYTg0NTQwNWU4NDNjMjNhN2Y2MThlMWNjIiwidXNlcl9pZCI6IjIifQ.dcZ0PCw_5xdKywlHMpPMnreJVmhmXMTAFkpuaZtdUZg
+2 - 8052
 
 
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMjcxLCJpYXQiOjE3NjQ0NDA2NzEsImp0aSI6IjI1MmVjNTI3MGQxODQwNTBhMmI0YmJkYmRhYWNlYjNlIiwidXNlcl9pZCI6IjMifQ.HUl-hl0ndsb2lHqdB7LyR6I2Yg-uy_eC3o86l8z387I
+3 - 8050
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NjczNzczLCJpYXQiOjE3NjQ2NTIxNzMsImp0aSI6IjI5ZDc3MTg5YmE1NTRiOTZiZjc3YmRhYzU3ZDg1ZGZhIiwidXNlcl9pZCI6IjUifQ.R_z0VxEhc5oz60qTRK37SzTCyF4gyKzn961vpnZKRmM
+
+
+
+## API Endpoints
+
+### Authentication
+- `POST /api/v1/auth/send-code` - Send sms code
+- `POST /api/v1/auth/verify-code` - confirm sms code and get token
+- `POST /api/v1/auth/refresh-token` - get access token
+- `PATCH /api/v1/profile` - update current user's profile
+- `DELETE /api/v1/delete-account` - delete current user
+
+### Chat Rooms
+- `GET /api/v1/chats` - user's all chats
+- `POST /api/v1/chats` - Create chat room (private, group)
+- `GET /api/v1/chats/{id}/messages` - Get messages (paginated)
+
+
+
+
+
+
+---------------------------------------------------------------------------
+
+- `POST /api/chat-rooms/{id}/add_members/` - Add members
+- `POST /api/chat-rooms/{id}/leave/` - Leave room
+
+### Messages
+- `GET /api/messages/` - List messages
+- `POST /api/messages/` - Create message
+- `POST /api/messages/{id}/mark_read/` - Mark as read
+- `POST /api/messages/mark_all_read/` - Mark all as read
+
+### Users
+- `GET /api/users/` - List users
+- `GET /api/users/{id}/` - Get user detail

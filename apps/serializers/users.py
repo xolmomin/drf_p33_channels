@@ -15,6 +15,12 @@ class UserModelSerializer(ModelSerializer):
         fields = 'id', 'phone', 'first_name', 'last_name', 'bio'
 
 
+class UserProfileUpdateModelSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = 'first_name', 'last_name', 'birth_date', 'bio', 'image', 'username'
+
+
 class SendCodeSerializer(Serializer):
     phone = CharField(default='998901001010')
 

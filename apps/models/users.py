@@ -1,5 +1,7 @@
 from django.contrib.auth.models import AbstractUser
-from django.db.models.fields import CharField
+from django.db.models import CharField, ImageField, DateField, BooleanField
+
+from apps.models.manager import UserManager
 
 
 class User(AbstractUser):
@@ -7,8 +9,16 @@ class User(AbstractUser):
     username = CharField(max_length=33, null=True, blank=True, unique=True)
     first_name = CharField(max_length=65, blank=True)
     last_name = CharField(max_length=150, null=True, blank=True)
+    birth_date = DateField(null=True, blank=True)
     bio = CharField(max_length=70, null=True, blank=True)
-    password = None
+    is_online = BooleanField(default=False, db_default=False)
+    image = ImageField(upload_to='users/images/%Y/%m/%d', null=True, blank=True)
+
+    objects = UserManager()
+
+    # password = None
     email = None
 
     USERNAME_FIELD = 'phone'
+    EMAIL_FIELD = None
+    REQUIRED_FIELDS = []

@@ -1,0 +1,222 @@
+[
+  {
+    "model": "apps.user",
+    "pk": 1,
+    "fields": {
+      "phone": "10000000001",
+      "username": "user1",
+      "first_name": "User1",
+      "last_name": "Test1",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 2,
+    "fields": {
+      "phone": "10000000002",
+      "username": "user2",
+      "first_name": "User2",
+      "last_name": "Test2",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 3,
+    "fields": {
+      "phone": "10000000003",
+      "username": "user3",
+      "first_name": "User3",
+      "last_name": "Test3",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 4,
+    "fields": {
+      "phone": "10000000004",
+      "username": "user4",
+      "first_name": "User4",
+      "last_name": "Test4",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 5,
+    "fields": {
+      "phone": "10000000005",
+      "username": "user5",
+      "first_name": "User5",
+      "last_name": "Test5",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 6,
+    "fields": {
+      "phone": "10000000006",
+      "username": "user6",
+      "first_name": "User6",
+      "last_name": "Test6",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 7,
+    "fields": {
+      "phone": "10000000007",
+      "username": "user7",
+      "first_name": "User7",
+      "last_name": "Test7",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 8,
+    "fields": {
+      "phone": "10000000008",
+      "username": "user8",
+      "first_name": "User8",
+      "last_name": "Test8",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 9,
+    "fields": {
+      "phone": "10000000009",
+      "username": "user9",
+      "first_name": "User9",
+      "last_name": "Test9",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 10,
+    "fields": {
+      "phone": "10000000010",
+      "username": "user10",
+      "first_name": "User10",
+      "last_name": "Test10",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 11,
+    "fields": {
+      "phone": "10000000011",
+      "username": "user11",
+      "first_name": "User11",
+      "last_name": "Test11",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 12,
+    "fields": {
+      "phone": "10000000012",
+      "username": "user12",
+      "first_name": "User12",
+      "last_name": "Test12",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 13,
+    "fields": {
+      "phone": "10000000013",
+      "username": "user13",
+      "first_name": "User13",
+      "last_name": "Test13",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 14,
+    "fields": {
+      "phone": "10000000014",
+      "username": "user14",
+      "first_name": "User14",
+      "last_name": "Test14",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 15,
+    "fields": {
+      "phone": "10000000015",
+      "username": "user15",
+      "first_name": "User15",
+      "last_name": "Test15",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 16,
+    "fields": {
+      "phone": "10000000016",
+      "username": "user16",
+      "first_name": "User16",
+      "last_name": "Test16",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 17,
+    "fields": {
+      "phone": "10000000017",
+      "username": "user17",
+      "first_name": "User17",
+      "last_name": "Test17",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 18,
+    "fields": {
+      "phone": "10000000018",
+      "username": "user18",
+      "first_name": "User18",
+      "last_name": "Test18",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 19,
+    "fields": {
+      "phone": "10000000019",
+      "username": "user19",
+      "first_name": "User19",
+      "last_name": "Test19",
+      "is_online": false
+    }
+  },
+  {
+    "model": "apps.user",
+    "pk": 20,
+    "fields": {
+      "phone": "10000000020",
+      "username": "user20",
+      "first_name": "User20",
+      "last_name": "Test20",
+      "is_online": false
+    }
+  }
+]

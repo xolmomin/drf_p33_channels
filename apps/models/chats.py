@@ -28,10 +28,9 @@ class Chat(CreatedBaseModel):
 
 class Message(CreatedBaseModel):
     message = TextField()
-    # chat = ForeignKey('apps.Chat', CASCADE, related_name='messages')
+    chat = ForeignKey('apps.Chat', CASCADE, related_name='messages')
 
     from_user = ForeignKey('apps.User', SET_NULL, null=True, related_name='from_messages')
-    to_user = ForeignKey('apps.User', SET_NULL, null=True, related_name='to_messages')
 
     is_read = BooleanField(default=False, db_default=False)
     is_edited = BooleanField(default=False, db_default=False)

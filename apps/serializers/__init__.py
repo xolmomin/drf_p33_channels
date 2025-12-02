@@ -1,1 +1,1 @@
-from apps.serializers.users import SendCodeSerializer, VerifyCodeSerializer
+from apps.serializers.users import SendCodeSerializer, VerifyCodeSerializer, UserProfileUpdateModelSerializer
