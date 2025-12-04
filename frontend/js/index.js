@@ -5,9 +5,7 @@ const baseUrl = 'http://localhost:8000/api/v1/';
 async function isValidToken(token) {
     try {
         const response = await fetch(`${baseUrl}auth/verify-token`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            mode: 'cors',  // important for cross-origin requests
+            method: 'POST', headers: {'Content-Type': 'application/json'}, mode: 'cors',  // important for cross-origin requests
             body: JSON.stringify({token: token})
         });
         if (!response.ok) {
@@ -22,114 +20,99 @@ async function isValidToken(token) {
 
 
 // Sample data structure matching Django models
-const sampleChats = [
-    {
-        id: 1,
-        name: "Sarah Wilson",
-        type: "private",
-        image: null,
-        lastMessage: "Hey! How are you doing?",
-        lastMessageTime: "10:30 AM",
-        unreadCount: 2,
-        isOnline: true,
-        members: [1, 2]
-    },
-    {
-        id: 2,
-        name: "Project Team",
-        type: "group",
-        image: null,
-        lastMessage: "Meeting at 3 PM today",
-        lastMessageTime: "9:15 AM",
-        unreadCount: 5,
-        isOnline: false,
-        members: [1, 3, 4, 5]
-    },
-    {
-        id: 3,
-        name: "Mike Johnson",
-        type: "private",
-        image: null,
-        lastMessage: "Thanks for your help!",
-        lastMessageTime: "Yesterday",
-        unreadCount: 0,
-        isOnline: true,
-        members: [1, 3]
-    },
-    {
-        id: 4,
-        name: "Design Team",
-        type: "group",
-        image: null,
-        lastMessage: "New mockups are ready",
-        lastMessageTime: "Yesterday",
-        unreadCount: 0,
-        isOnline: false,
-        members: [1, 6, 7, 8]
-    }
-];
+const sampleChats = [{
+    id: 1,
+    name: "Sarah Wilson",
+    type: "private",
+    image: null,
+    last_message: "Hey! How are you doing?",
+    last_message_time: "10:30 AM",
+    unread_count: 2,
+    is_online: true,
+    members: [1, 2]
+}, {
+    id: 2,
+    name: "Project Team",
+    type: "group",
+    image: null,
+    last_message: "Meeting at 3 PM today",
+    last_message_time: "9:15 AM",
+    unread_count: 5,
+    is_online: false,
+    members: [1, 3, 4, 5]
+}, {
+    id: 3,
+    name: "Mike Johnson",
+    type: "private",
+    image: null,
+    last_message: "Thanks for your help!",
+    last_message_time: "Yesterday",
+    unread_count: 0,
+    is_online: true,
+    members: [1, 3]
+}, {
+    id: 4,
+    name: "Design Team",
+    type: "group",
+    image: null,
+    last_message: "New mockups are ready",
+    last_message_time: "Yesterday",
+    unread_count: 0,
+    is_online: false,
+    members: [1, 6, 7, 8]
+}];
 
 const sampleMessages = {
-    1: [
-        {
-            id: 1,
-            message: "Hey! How are you doing?",
-            fromUserId: 2,
-            isRead: true,
-            isEdited: false,
-            createdAt: "10:28 AM"
-        },
-        {
-            id: 2,
-            message: "I'm great! Just working on the new project",
-            fromUserId: 1,
-            isRead: true,
-            isEdited: false,
-            createdAt: "10:29 AM"
-        },
-        {
-            id: 3,
-            message: "That sounds exciting! Can you tell me more?",
-            fromUserId: 2,
-            isRead: false,
-            isEdited: false,
-            createdAt: "10:30 AM"
-        }
-    ],
-    2: [
-        {id: 4, message: "Good morning everyone!", fromUserId: 3, isRead: true, isEdited: false, createdAt: "9:00 AM"},
-        {
-            id: 5,
-            message: "Don't forget about the meeting",
-            fromUserId: 4,
-            isRead: true,
-            isEdited: false,
-            createdAt: "9:10 AM"
-        },
-        {id: 6, message: "Meeting at 3 PM today", fromUserId: 5, isRead: false, isEdited: false, createdAt: "9:15 AM"}
-    ],
-    3: [
-        {
-            id: 7,
-            message: "Can you help me with the code review?",
-            fromUserId: 3,
-            isRead: true,
-            isEdited: false,
-            createdAt: "Yesterday"
-        },
-        {
-            id: 8,
-            message: "Of course! Send it over",
-            fromUserId: 1,
-            isRead: true,
-            isEdited: false,
-            createdAt: "Yesterday"
-        },
-        {id: 9, message: "Thanks for your help!", fromUserId: 3, isRead: true, isEdited: false, createdAt: "Yesterday"}
-    ],
-    4: [
-        {id: 10, message: "New mockups are ready", fromUserId: 6, isRead: true, isEdited: false, createdAt: "Yesterday"}
-    ]
+    1: [{
+        id: 1, message: "Hey! How are you doing?", fromUserId: 2, isRead: true, isEdited: false, createdAt: "10:28 AM"
+    }, {
+        id: 2,
+        message: "I'm great! Just working on the new project",
+        fromUserId: 1,
+        isRead: true,
+        isEdited: false,
+        createdAt: "10:29 AM"
+    }, {
+        id: 3,
+        message: "That sounds exciting! Can you tell me more?",
+        fromUserId: 2,
+        isRead: false,
+        isEdited: false,
+        createdAt: "10:30 AM"
+    }],
+    2: [{
+        id: 4,
+        message: "Good morning everyone!",
+        fromUserId: 3,
+        isRead: true,
+        isEdited: false,
+        createdAt: "9:00 AM"
+    }, {
+        id: 5,
+        message: "Don't forget about the meeting",
+        fromUserId: 4,
+        isRead: true,
+        isEdited: false,
+        createdAt: "9:10 AM"
+    }, {id: 6, message: "Meeting at 3 PM today", fromUserId: 5, isRead: false, isEdited: false, createdAt: "9:15 AM"}],
+    3: [{
+        id: 7,
+        message: "Can you help me with the code review?",
+        fromUserId: 3,
+        isRead: true,
+        isEdited: false,
+        createdAt: "Yesterday"
+    }, {
+        id: 8, message: "Of course! Send it over", fromUserId: 1, isRead: true, isEdited: false, createdAt: "Yesterday"
+    }, {id: 9, message: "Thanks for your help!", fromUserId: 3, isRead: true, isEdited: false, createdAt: "Yesterday"}],
+    4: [{
+        id: 10,
+        message: "New mockups are ready",
+        fromUserId: 6,
+        isRead: true,
+        isEdited: false,
+        createdAt: "Yesterday"
+    }]
 };
 
 let currentUserId = 1;
@@ -154,8 +137,7 @@ function renderChatList() {
     // Filter chats based on search query
     const filteredChats = sampleChats.filter(chat => {
         if (!searchQuery) return true;
-        return chat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+        return chat.name.toLowerCase().includes(searchQuery.toLowerCase()) || chat.last_message.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     if (filteredChats.length === 0) {
@@ -170,19 +152,24 @@ function renderChatList() {
 
     filteredChats.forEach(chat => {
         const firstLetter = chat.name.charAt(0).toUpperCase();
+
+        const avatarContent = chat.image
+            ? `<img src="${chat.image}" alt="${chat.name}" style="width: 40px; height: 40px; border-radius: 50%;">`
+            : firstLetter;
+
         const chatItem = $(`
                     <div class="chat-item" data-chat-id="${chat.id}">
                         <div class="chat-avatar">
-                            ${firstLetter}
-                            ${chat.isOnline ? '<div class="online-indicator"></div>' : ''}
+                            ${avatarContent}
+                            ${chat.is_online ? '<div class="online-indicator"></div>' : ''}
                         </div>
                         <div class="chat-info">
                             <div class="chat-name">${chat.name}</div>
-                            <div class="chat-preview">${chat.lastMessage}</div>
+                            <div class="chat-preview">${chat.last_message}</div>
                         </div>
                         <div class="chat-meta">
-                            <div class="chat-time">${chat.lastMessageTime}</div>
-                            ${chat.unreadCount > 0 ? `<div class="unread-badge">${chat.unreadCount}</div>` : ''}
+                            <div class="chat-time">${chat.last_message_time}</div>
+                            ${chat.unread_count > 0 ? `<div class="unread-badge">${chat.unread_count}</div>` : ''}
                         </div>
                     </div>
                 `);
@@ -195,36 +182,137 @@ function renderChatList() {
     });
 }
 
-// Open specific chat
-function openChat(chatId) {
-    activeChat = sampleChats.find(c => c.id === chatId);
-    if (!activeChat) return;
+function debounce(func, delay) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), delay);
+    };
+}
 
-    // Update active state
+function searchFromApi(query) {
+
+    if (!query) {
+        renderChatList([]);
+        return;
+    }
+
+    $.ajax({
+        url: `${baseUrl}users`,   // API endpointingiz
+        method: 'GET', data: {search: query}, headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }, success: function (res) {
+            renderChatListFromUsers(res);
+        }, error: function (err) {
+            console.error("Search error:", err);
+        }
+    });
+}
+
+function renderMessagesFromApi(chat) {
+    const container = $("#messageList");
+    container.empty();
+
+    if (!chat.messages || chat.messages.length === 0) {
+        container.append(`<div class="empty-messages">Xabarlar yo‘q</div>`);
+        return;
+    }
+
+    chat.messages.forEach(msg => {
+        container.append(`
+            <div class="message ${msg.is_me ? 'me' : ''}">
+                <div class="text">${msg.text}</div>
+                <div class="time">${msg.time}</div>
+            </div>
+        `);
+    });
+}
+
+
+// Open specific chat
+async function openChat(chatId) {
+    let activeChat = null;
+
+    try {
+        // API’dan olishga harakat
+        const res = await fetch(`${baseUrl}chats/${chatId}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (res.status === 404) {
+            // 404 bo‘lsa — chat bor, lekin ichida xabar yo‘q
+            activeChat = {id: chatId, name: `Chat ${chatId}`, messages: [], unread_count: 0};
+        } else if (!res.ok) {
+            throw new Error("API error");
+        } else {
+            // API ma’lumotlarini olish
+            activeChat = await res.json();
+        }
+
+    } catch (e) {
+        console.error("Chatni olishda xatolik:", e);
+        return;
+    }
+
+    // Global activeChat o‘zgartiriladi
+    window.activeChat = activeChat;
+
+    // UI ni yangilash
     $('.chat-item').removeClass('active');
     $(`.chat-item[data-chat-id="${chatId}"]`).addClass('active');
 
-    // Show chat area
     $('#emptyState').hide();
     $('#activeChatArea').css('display', 'flex');
 
-    // Update header
-    const firstLetter = activeChat.name.charAt(0).toUpperCase();
+    const firstLetter = (activeChat.name || "C").charAt(0).toUpperCase();
     $('#activeChatAvatar').text(firstLetter);
-    $('#activeChatName').text(activeChat.name);
+    $('#activeChatName').text(activeChat.name || `Chat ${chatId}`);
+
     const config = window.elementSdk?.config || defaultConfig;
-    $('#activeChatStatus').text(activeChat.isOnline ? config.online_status_text : config.offline_status_text);
+    $('#activeChatStatus').text(activeChat.is_online ? config.online_status_text : config.offline_status_text);
 
-    // Load messages
-    renderMessages(chatId);
+    // Xabarlarni yuklash
+    renderMessagesFromApi(activeChat);
 
-    // Clear unread badge
-    activeChat.unreadCount = 0;
+    // Unread badge yo‘q qilinadi
+    activeChat.unread_count = 0;
     $(`.chat-item[data-chat-id="${chatId}"] .unread-badge`).remove();
 
-    // Focus input
+    // Fokus inputga
     $('#messageInput').focus();
 }
+
+// function openChat(chatId) {
+//     activeChat = sampleChats.find(c => c.id === chatId);
+//     if (!activeChat) return;
+//
+//     // Update active state
+//     $('.chat-item').removeClass('active');
+//     $(`.chat-item[data-chat-id="${chatId}"]`).addClass('active');
+//
+//     // Show chat area
+//     $('#emptyState').hide();
+//     $('#activeChatArea').css('display', 'flex');
+//
+//     // Update header
+//     const firstLetter = activeChat.name.charAt(0).toUpperCase();
+//     $('#activeChatAvatar').text(firstLetter);
+//     $('#activeChatName').text(activeChat.name);
+//     const config = window.elementSdk?.config || defaultConfig;
+//     $('#activeChatStatus').text(activeChat.is_online ? config.online_status_text : config.offline_status_text);
+//
+//     // Load messages
+//     renderMessages(chatId);
+//
+//     // Clear unread badge
+//     activeChat.unread_count = 0;
+//     $(`.chat-item[data-chat-id="${chatId}"] .unread-badge`).remove();
+//
+//     // Focus input
+//     $('#messageInput').focus();
+// }
 
 // Render messages for active chat
 function renderMessages(chatId) {
@@ -277,8 +365,8 @@ function sendMessage() {
     sampleMessages[activeChat.id].push(newMessage);
 
     // Update chat preview
-    activeChat.lastMessage = message;
-    activeChat.lastMessageTime = "Just now";
+    activeChat.last_message = message;
+    activeChat.last_message_time = "Just now";
 
     // Re-render
     renderMessages(activeChat.id);
@@ -314,9 +402,7 @@ async function onConfigChange(config) {
     $('#searchInput').attr('placeholder', config.search_placeholder || defaultConfig.search_placeholder);
 
     if (activeChat) {
-        const statusText = activeChat.isOnline ?
-            (config.online_status_text || defaultConfig.online_status_text) :
-            (config.offline_status_text || defaultConfig.offline_status_text);
+        const statusText = activeChat.is_online ? (config.online_status_text || defaultConfig.online_status_text) : (config.offline_status_text || defaultConfig.offline_status_text);
         $('#activeChatStatus').text(statusText);
     }
 
@@ -360,7 +446,6 @@ async function fetchChats() {
             throw new Error('Failed to fetch chats');
         }
         const data = await response.json();
-
         // SampleChats massivini yangilaymiz
         sampleChats.length = 0; // eski ma'lumotlarni tozalash
         data.forEach(chat => sampleChats.push(chat));
@@ -370,6 +455,50 @@ async function fetchChats() {
         console.error('Error fetching chats:', error);
     }
 }
+
+function renderChatListFromUsers(users) {
+    const chatListElement = $('#chatList');
+    chatListElement.empty();
+
+    if (!users || users.length === 0) {
+        chatListElement.append(`
+            <div style="padding: 40px; text-align: center; color: #95a5a6;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <div style="font-size: 15px;">No results found</div>
+            </div>
+        `);
+        return;
+    }
+
+    users.forEach(user => {
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No Name';
+        const firstLetter = name.charAt(0).toUpperCase();
+
+        const avatarContent = user.image
+            ? `<img src="${user.image}" alt="${name}" style="width: 40px; height: 40px; border-radius: 50%;">`
+            : firstLetter;
+
+        const chatItem = $(`
+            <div class="chat-item" data-user-id="${user.id}">
+                <div class="chat-avatar">
+                     ${avatarContent}
+                </div>
+                <div class="chat-info">
+                    <div class="chat-name">${name}</div>
+                    <div class="chat-preview">@${user.username || 'unknown'}</div>
+                </div>
+            </div>
+        `);
+
+        chatItem.on('click', function () {
+            openChat(user.id);
+            console.log("Open chat with user ID:", user.id);
+        });
+
+        chatListElement.append(chatItem);
+    });
+}
+
 
 function showLogoutModal() {
     $('#logoutModal').addClass('active');
@@ -422,7 +551,13 @@ function saveProfile(e) {
 
 // Event listeners
 $(document).ready(function () {
-    renderChatList();
+    if (accessToken) {
+        isValidToken(accessToken);
+        fetchChats();  // Sahifa yuklanganda chatlarni yuklaymiz
+    } else {
+        // Token yo'q bo'lsa, ro'yxatdan o'tish sahifasiga yo'naltirish
+        window.location.href = 'register.html';
+    }
 
     // Settings icon click
     $('#settingsIcon').on('click', openSettings);
@@ -459,19 +594,20 @@ $(document).ready(function () {
     // Profile form submit
     $('#profileForm').on('submit', saveProfile);
 
-    // Search functionality
-    $('#searchInput').on('input', function () {
-        searchQuery = $(this).val().trim();
+    $('#searchInput').on('input', debounce(function () {
+        const query = $(this).val().trim();
         const clearBtn = $('#clearSearch');
 
-        if (searchQuery.length > 0) {
+        if (query.length > 0) {
             clearBtn.css('display', 'flex');
         } else {
             clearBtn.hide();
         }
 
-        renderChatList();
-    });
+        // API ga so‘rov
+        searchFromApi(query);
+
+    }, 300)); // 300ms debounce
 
     // Clear search
     $('#clearSearch').on('click', function () {
@@ -517,19 +653,9 @@ $(document).ready(function () {
             defaultConfig: defaultConfig,
             onConfigChange: onConfigChange,
             mapToCapabilities: (config) => ({
-                recolorables: [],
-                borderables: [],
-                fontEditable: undefined,
-                fontSizeable: undefined
+                recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined
             }),
-            mapToEditPanelValues: (config) => new Map([
-                ["app_title", config.app_title || defaultConfig.app_title],
-                ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder],
-                ["online_status_text", config.online_status_text || defaultConfig.online_status_text],
-                ["offline_status_text", config.offline_status_text || defaultConfig.offline_status_text],
-                ["typing_indicator_text", config.typing_indicator_text || defaultConfig.typing_indicator_text],
-                ["send_button_text", config.send_button_text || defaultConfig.send_button_text]
-            ])
+            mapToEditPanelValues: (config) => new Map([["app_title", config.app_title || defaultConfig.app_title], ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder], ["online_status_text", config.online_status_text || defaultConfig.online_status_text], ["offline_status_text", config.offline_status_text || defaultConfig.offline_status_text], ["typing_indicator_text", config.typing_indicator_text || defaultConfig.typing_indicator_text], ["send_button_text", config.send_button_text || defaultConfig.send_button_text]])
         });
     }
 
@@ -548,17 +674,4 @@ $(document).ready(function () {
             renderMessages(1);
         }
     }, 5000);
-});
-
-
-$(document).ready(function () {
-    if (accessToken) {
-        isValidToken(accessToken);
-        fetchChats();  // Sahifa yuklanganda chatlarni yuklaymiz
-    } else {
-        // Token yo'q bo'lsa, ro'yxatdan o'tish sahifasiga yo'naltirish
-        window.location.href = 'register.html';
-    }
-
-    // Qolgan event listenerlar va funksiyalar...
 });

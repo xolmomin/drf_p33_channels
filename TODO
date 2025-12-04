@@ -11,10 +11,10 @@ ws://localhost:8000/chat
 2.
 
 # Homework
-1.+ swaggerda qulfchalar
-2.+ user ga rasmga qoshish
-3.+ /api/v1/profile user malumotlarini update qilish
-4.+ refresh token apisini chiqarish kk
+1.✅+ swaggerda qulfchalar
+2.✅+ user ga rasmga qoshish
+3.✅+ /api/v1/profile user malumotlarini update qilish
+4.✅+ refresh token apisini chiqarish kk
 
 5. /api/v1/chats
 [
@@ -23,41 +23,42 @@ ws://localhost:8000/chat
         'name': 'Gayrat Botirov',
         'image': 'rasm url',
         'last_message': 'oxirgi xabar bu',
-        'last_message_created_at': ''
+        'last_message_time': ''
     }
 ]
-6.+ /api/v1/delete-account
+6.✅+ /api/v1/delete-account
 7. - `GET /api/v1/chats/{id}/messages` - Get messages (paginated) apisini chiqarish
 8. [front] chatga kirganda chatga tegishli bolgan message larni chiqarsin
-9. adminkada chatni chiqarish kk (list display id, type, members, member_count
+9.✅+ adminkada chatni chiqarish kk (list display id, type, members, member_count
 agar private bolsa 998901001111 <-> 998901005555
 agar group bolsa 998901001111
                  998901001112
                  998901001111
-10. - `GET /api/v1/users` - List users apisini chiqarish, api faqat search yozilganda ishlashi kerak (search username boyicha) max 10ta chiqsin
+10✅. - `GET /api/v1/users` - List users apisini chiqarish, api faqat search yozilganda ishlashi kerak (search username boyicha) max 10ta chiqsin
+11. adminkaga phone orqali kirish va sms kod yuborish qilish (password ni butunlay olib tashash)
+12.
+13. frontga message larni chiqarish (is_edited, vaqti ham chiqsin)
+14. profile image ni update qilish
+15. hozirgi user malumotlarini chiqarish (rasmi, phone, fullname)
+
 
 keyingi darsda
 1. 1-1, group
-4. front
 
 2. is_read, is_edited
 3. online statusni olish
 
 
-ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMDk3LCJpYXQiOjE3NjQ0NDA0OTcsImp0aSI6IjY5MjhiMTRkNjk3ZDQ5NzBiYTY3NTQwYzNlZjllNjQ5IiwidXNlcl9pZCI6IjEifQ.Ma4uAk1Lyj-QJEHZEdaZGt1rU4KU7uWtlJxTrRkZick
-1 - 1010
+
+100 - 901001010
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMxMTc5LCJpYXQiOjE3NjQ4MjcxNzksImp0aSI6IjMzODJkMGRmYmJiZjRmZmNiMjIzMGM0M2UwNzY0OTAzIiwidXNlcl9pZCI6IjEwMCJ9.4UakkOS9SAKH96ADs68tFE3s6aKjfk0VwiuC1StUNKw
+
+1 - 901001001
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMzNTA5LCJpYXQiOjE3NjQ4Mjk1MDksImp0aSI6IjUxMGFmYjJmZWUxYjRkODM5NGFlMjM0NDYxM2E5NjA1IiwidXNlcl9pZCI6IjEifQ.UvOReehmSucuiPZ9uncpGfkhX180ajgX2EcLZEMyJBo
 
 
-ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMTMzLCJpYXQiOjE3NjQ0NDA1MzMsImp0aSI6IjY4MDgxMmJhYTg0NTQwNWU4NDNjMjNhN2Y2MThlMWNjIiwidXNlcl9pZCI6IjIifQ.dcZ0PCw_5xdKywlHMpPMnreJVmhmXMTAFkpuaZtdUZg
-2 - 8052
-
-
-ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NDYyMjcxLCJpYXQiOjE3NjQ0NDA2NzEsImp0aSI6IjI1MmVjNTI3MGQxODQwNTBhMmI0YmJkYmRhYWNlYjNlIiwidXNlcl9pZCI6IjMifQ.HUl-hl0ndsb2lHqdB7LyR6I2Yg-uy_eC3o86l8z387I
-3 - 8050
-
-
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY0NjczNzczLCJpYXQiOjE3NjQ2NTIxNzMsImp0aSI6IjI5ZDc3MTg5YmE1NTRiOTZiZjc3YmRhYzU3ZDg1ZGZhIiwidXNlcl9pZCI6IjUifQ.R_z0VxEhc5oz60qTRK37SzTCyF4gyKzn961vpnZKRmM
-
+http://localhost:3000/frontend/index.html
+http://127.0.0.1:3000/frontend/index.html
 
 
 ## API Endpoints
@@ -94,3 +95,6 @@ eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY
 ### Users
 - `GET /api/users/` - List users
 - `GET /api/users/{id}/` - Get user detail
+
+
+http://localhost:8000/api/v1/users?search=shahob

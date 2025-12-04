@@ -14,6 +14,7 @@ pip-selfcheck.json
 .idea/**/dictionaries
 .idea/**/shelf
 .idea
+media
 .idea/**/aws.xml
 .idea/**/contentModel.xml
 .idea/**/dataSources/

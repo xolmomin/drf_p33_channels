@@ -15,6 +15,9 @@ class Chat(CreatedBaseModel):
     type = CharField(max_length=10, choices=Type.choices, default=Type.PRIVATE)
     members = ManyToManyField('apps.User', related_name='chats')
 
+    def __str__(self):
+        return self.name
+
     def create_group(self, user):
         obj, created = self.__class__.objects.get_or_create(members=user, type=self.Type.GROUP)
         return obj, created
@@ -51,3 +54,6 @@ class Message(CreatedBaseModel):
     def read(self):
         self.is_read = True
         self.save(update_fields=['is_read'])
+
+    def __str__(self):
+        return self.message[:20]

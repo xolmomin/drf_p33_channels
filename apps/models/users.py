@@ -22,3 +22,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'phone'
     EMAIL_FIELD = None
     REQUIRED_FIELDS = []
+
+    @property
+    def full_name(self):
+        return self.first_name + ' ' + self.last_name
