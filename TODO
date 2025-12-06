@@ -38,8 +38,9 @@ agar group bolsa 998901001111
 11. adminkaga phone orqali kirish va sms kod yuborish qilish (password ni butunlay olib tashash)
 12.
 13. frontga message larni chiqarish (is_edited, vaqti ham chiqsin)
-14. profile image ni update qilish
-15. hozirgi user malumotlarini chiqarish (rasmi, phone, fullname)
+14. frontda user profile da (image update qilish)
+15. hozirgi user malumotlarini chiqarish (rasmi)
+16.
 
 
 keyingi darsda
@@ -53,8 +54,12 @@ keyingi darsda
 100 - 901001010
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMxMTc5LCJpYXQiOjE3NjQ4MjcxNzksImp0aSI6IjMzODJkMGRmYmJiZjRmZmNiMjIzMGM0M2UwNzY0OTAzIiwidXNlcl9pZCI6IjEwMCJ9.4UakkOS9SAKH96ADs68tFE3s6aKjfk0VwiuC1StUNKw
 
-1 - 901001001
+1 - 901001001 gayrat
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMzNTA5LCJpYXQiOjE3NjQ4Mjk1MDksImp0aSI6IjUxMGFmYjJmZWUxYjRkODM5NGFlMjM0NDYxM2E5NjA1IiwidXNlcl9pZCI6IjEifQ.UvOReehmSucuiPZ9uncpGfkhX180ajgX2EcLZEMyJBo
+
+2 - 901001002 botir
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk2MDk5MTg5LCJpYXQiOjE3NjQ5OTUxODksImp0aSI6IjA0ODk3ZTlhYzcxMjRhYTJiMjRkN2ZiNTY4ZGU0NWU2IiwidXNlcl9pZCI6IjIifQ.Vv98Jcvh3TvnHlrq3uumhuAIB7-Fn_BIA2dlEoQEH58
+
 
 
 http://localhost:3000/frontend/index.html

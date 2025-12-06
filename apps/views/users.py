@@ -1,6 +1,6 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.generics import UpdateAPIView, DestroyAPIView
+from rest_framework.generics import UpdateAPIView, DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,11 +21,10 @@ class UserDeleteAccountDestroyAPIView(DestroyAPIView):
 
 
 @extend_schema(tags=['Auth & Users'])
-class UserProfileUpdateAPIView(UpdateAPIView):
+class UserProfileRetrieveUpdateAPIView(RetrieveUpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileUpdateModelSerializer
     permission_classes = IsAuthenticated,
-    http_method_names = ['patch']
 
     def get_object(self):
         return self.request.user

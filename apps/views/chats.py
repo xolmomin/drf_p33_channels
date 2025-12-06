@@ -3,8 +3,9 @@ from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 
-from apps.models import Chat, User
-from apps.serializers import ChatListModelSerializer, ChatCreateModelSerializer, UserListModelSerializer
+from apps.models import Chat, User, Message
+from apps.serializers import MessageListModelSerializer, ChatListModelSerializer, ChatCreateModelSerializer, \
+    UserListModelSerializer
 
 
 @extend_schema(tags=['Chats'])
@@ -44,3 +45,15 @@ class UserListAPIView(ListAPIView):
 
     def filter_queryset(self, queryset):
         return super().filter_queryset(queryset)[:3]
+
+
+@extend_schema(tags=['Chats'])
+class MessageListAPIView(ListAPIView):
+    queryset = Message.objects.order_by('created_at')
+    serializer_class = MessageListModelSerializer
+    permission_classes = IsAuthenticated,
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        chat_id = self.kwargs.get('chat_id')
+        return qs.filter(chat_id=chat_id)

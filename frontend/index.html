@@ -56,8 +56,11 @@
                     </div>
                 </div>
             </div>
-            <div class="messages-container" id="messagesContainer"><!-- Messages will be dynamically added here -->
+
+            <div class="messages-container" id="messagesContainer">
+                <!-- Messages will be dynamically added here -->
             </div>
+
             <div class="chat-input-container">
                 <div class="chat-input-wrapper">
                     <input type="text" class="chat-input" id="messageInput"
@@ -66,8 +69,12 @@
                 </div>
             </div>
         </div>
-    </div><!-- Settings Overlay -->
-    <div class="settings-overlay" id="settingsOverlay"></div><!-- Settings Sidebar -->
+    </div>
+
+    <!-- Settings Overlay -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+
+    <!-- Settings Sidebar -->
     <div class="settings-sidebar" id="settingsSidebar">
         <div class="settings-header">
             <div class="back-button" id="backButton">
@@ -97,7 +104,9 @@
                         <p>Sign out from your account</p>
                     </div>
                 </div>
-            </div><!-- Profile Section -->
+            </div>
+
+            <!-- Profile Section -->
             <div class="profile-section" id="profileSection">
                 <div class="success-message" id="successMessage">
                     Profile updated successfully!
@@ -106,16 +115,20 @@
                     JD
                 </div>
                 <form id="profileForm">
-                    <div class="form-group"><label for="fullName">Full Name</label>
-                        <input type="text" id="fullName" value="John Doe" required>
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" required>
                     </div>
-                    <div class="form-group"><label for="username">Username</label>
-                        <input type="text" id="username" value="johndoe" required>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName">
                     </div>
-                    <div class="form-group"><label for="email">Email</label>
-                        <input type="email" id="email" value="john.doe@example.com" required>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username">
                     </div>
-                    <div class="form-group"><label for="bio">Bio</label>
+                    <div class="form-group">
+                        <label for="bio">Bio</label>
                         <input type="text" id="bio" value="Web Developer | Coffee Enthusiast"
                                placeholder="Tell us about yourself">
                     </div>
@@ -123,7 +136,9 @@
                 </form>
             </div>
         </div>
-    </div><!-- Logout Modal -->
+    </div>
+
+    <!-- Logout Modal -->
     <div class="logout-modal" id="logoutModal">
         <div class="logout-modal-icon">
             👋

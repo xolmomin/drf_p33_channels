@@ -18,7 +18,7 @@ class UserModelSerializer(ModelSerializer):
 class UserProfileUpdateModelSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = 'first_name', 'last_name', 'birth_date', 'bio', 'image', 'username'
+        fields = 'id', 'first_name', 'last_name', 'birth_date', 'bio', 'image', 'username'
 
 
 class SendCodeSerializer(Serializer):

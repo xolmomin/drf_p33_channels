@@ -1,6 +1,7 @@
 const accessToken = localStorage.getItem('access_token');
-const baseUrl = 'http://localhost:8000/api/v1/';
-
+const hostName = window.location.hostname;
+const baseUrl = `http://${hostName}:8000/api/v1/`;
+const wsBaseUrl = `ws://${hostName}:8000/chat`;
 
 async function isValidToken(token) {
     try {
@@ -11,13 +12,13 @@ async function isValidToken(token) {
         if (!response.ok) {
             localStorage.removeItem('access_token');
             window.location.href = 'register.html';
-
         }
+        return true;
     } catch (error) {
         alert('error')
+        return false
     }
 }
-
 
 // Sample data structure matching Django models
 const sampleChats = [{
@@ -62,63 +63,13 @@ const sampleChats = [{
     members: [1, 6, 7, 8]
 }];
 
-const sampleMessages = {
-    1: [{
-        id: 1, message: "Hey! How are you doing?", fromUserId: 2, isRead: true, isEdited: false, createdAt: "10:28 AM"
-    }, {
-        id: 2,
-        message: "I'm great! Just working on the new project",
-        fromUserId: 1,
-        isRead: true,
-        isEdited: false,
-        createdAt: "10:29 AM"
-    }, {
-        id: 3,
-        message: "That sounds exciting! Can you tell me more?",
-        fromUserId: 2,
-        isRead: false,
-        isEdited: false,
-        createdAt: "10:30 AM"
-    }],
-    2: [{
-        id: 4,
-        message: "Good morning everyone!",
-        fromUserId: 3,
-        isRead: true,
-        isEdited: false,
-        createdAt: "9:00 AM"
-    }, {
-        id: 5,
-        message: "Don't forget about the meeting",
-        fromUserId: 4,
-        isRead: true,
-        isEdited: false,
-        createdAt: "9:10 AM"
-    }, {id: 6, message: "Meeting at 3 PM today", fromUserId: 5, isRead: false, isEdited: false, createdAt: "9:15 AM"}],
-    3: [{
-        id: 7,
-        message: "Can you help me with the code review?",
-        fromUserId: 3,
-        isRead: true,
-        isEdited: false,
-        createdAt: "Yesterday"
-    }, {
-        id: 8, message: "Of course! Send it over", fromUserId: 1, isRead: true, isEdited: false, createdAt: "Yesterday"
-    }, {id: 9, message: "Thanks for your help!", fromUserId: 3, isRead: true, isEdited: false, createdAt: "Yesterday"}],
-    4: [{
-        id: 10,
-        message: "New mockups are ready",
-        fromUserId: 6,
-        isRead: true,
-        isEdited: false,
-        createdAt: "Yesterday"
-    }]
-};
+const sampleMessages = {};
 
-let currentUserId = 1;
+let currentUser = null;
 let activeChat = null;
 let typingTimeout = null;
 let searchQuery = '';
+let ws = null;
 
 const defaultConfig = {
     app_title: "Chat Application",
@@ -210,24 +161,29 @@ function searchFromApi(query) {
 }
 
 function renderMessagesFromApi(chat) {
-    const container = $("#messageList");
+    const container = $("#messagesContainer");
     container.empty();
 
     if (!chat.messages || chat.messages.length === 0) {
-        container.append(`<div class="empty-messages">Xabarlar yo‘q</div>`);
+        container.append(`<div class="empty-messages"></div>`);
         return;
     }
 
     chat.messages.forEach(msg => {
         container.append(`
-            <div class="message ${msg.is_me ? 'me' : ''}">
-                <div class="text">${msg.text}</div>
-                <div class="time">${msg.time}</div>
+            <div class="message ${msg.isSent ? 'sent' : 'received'}">
+                <div class="message-content">
+                    <div class="message-bubble">${msg.message}</div>
+                    <div class="message-time">
+                        ${msg.created_at}
+                        ${msg.isSent ? '<span class="message-status">✓���</span>' : ''}
+                    </div>
+                </div>
             </div>
         `);
     });
+    container.scrollTop(container[0].scrollHeight);
 }
-
 
 // Open specific chat
 async function openChat(chatId) {
@@ -273,9 +229,29 @@ async function openChat(chatId) {
     const config = window.elementSdk?.config || defaultConfig;
     $('#activeChatStatus').text(activeChat.is_online ? config.online_status_text : config.offline_status_text);
 
+    // API dan message larni olish kodni shu yerga yoz
+    const response = await fetch(`${baseUrl}chats/${chatId}/messages`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error("Messages API error");
+    }
+
+    // Chat obyektiga messages ni qo'shamiz
+    activeChat.messages = (await response.json()).map(msg => ({
+        ...msg,
+        isSent: msg.from_user === currentUser.id,  // xabar o‘zimdan bo‘lsa true
+        created_at: new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}) // vaqtni oson o'qiladigan qilib
+    }));
+
     // Xabarlarni yuklash
     renderMessagesFromApi(activeChat);
+    console.log(activeChat.messages);
 
+    console.log('xatolik')
     // Unread badge yo‘q qilinadi
     activeChat.unread_count = 0;
     $(`.chat-item[data-chat-id="${chatId}"] .unread-badge`).remove();
@@ -322,14 +298,14 @@ function renderMessages(chatId) {
     const messages = sampleMessages[chatId] || [];
 
     messages.forEach(msg => {
-        const isSent = msg.fromUserId === currentUserId;
+        // const isSent = msg.fromUserId === currentUser.id;
         const messageElement = $(`
-                    <div class="message ${isSent ? 'sent' : 'received'}">
+                    <div class="message ${msg.isSent ? 'sent' : 'received'}">
                         <div class="message-content">
                             <div class="message-bubble">${msg.message}</div>
                             <div class="message-time">
-                                ${msg.createdAt}
-                                ${isSent ? '<span class="message-status">✓���</span>' : ''}
+                                ${msg.created_at}
+                                ${msg.isSent ? '<span class="message-status">✓���</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -346,13 +322,15 @@ function sendMessage() {
     const input = $('#messageInput');
     const message = input.val().trim();
 
+    let activeChat = window.activeChat
+
     if (!message || !activeChat) return;
 
     // Create new message
     const newMessage = {
         id: Date.now(),
         message: message,
-        fromUserId: currentUserId,
+        fromUserId: currentUser.id,
         isRead: false,
         isEdited: false,
         createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
@@ -369,6 +347,7 @@ function sendMessage() {
     activeChat.last_message_time = "Just now";
 
     // Re-render
+    console.log('shu yerda');
     renderMessages(activeChat.id);
     renderChatList();
     $(`.chat-item[data-chat-id="${activeChat.id}"]`).addClass('active');
@@ -378,10 +357,12 @@ function sendMessage() {
     $('#sendButton').prop('disabled', true);
 
     // In a real app, this would send via WebSocket:
-    // chatSocket.send(JSON.stringify({
-    //     'message': message,
-    //     'chat_id': activeChat.id
-    // }));
+    let msg = JSON.stringify({
+        'message': message,
+        'chat_id': activeChat.id
+    });
+    console.log(msg);
+    ws.send(msg);
 }
 
 // Handle typing indicator
@@ -416,7 +397,6 @@ function openSettings() {
     $('#settingsOverlay').addClass('active');
     $('#settingsMenu').show();
     $('#profileSection').removeClass('active');
-    $('#settingsPageTitle').text('Settings');
 }
 
 function closeSettings() {
@@ -430,7 +410,7 @@ function openProfile() {
     $('#settingsPageTitle').text('Edit Profile');
 
     // Update avatar in profile section
-    const initials = $('#fullName').val().split(' ').map(n => n[0]).join('');
+    const initials = ($('#firstName').val() + ' ' + $('#lastName').val()).split(' ').map(n => n[0]).join('');
     $('#profileAvatarLarge').text(initials);
 }
 
@@ -448,7 +428,9 @@ async function fetchChats() {
         const data = await response.json();
         // SampleChats massivini yangilaymiz
         sampleChats.length = 0; // eski ma'lumotlarni tozalash
-        data.forEach(chat => sampleChats.push(chat));
+        data.forEach(chat => {
+            sampleChats.push(chat)
+        });
 
         renderChatList();
     } catch (error) {
@@ -456,49 +438,48 @@ async function fetchChats() {
     }
 }
 
-function renderChatListFromUsers(users) {
-    const chatListElement = $('#chatList');
-    chatListElement.empty();
-
-    if (!users || users.length === 0) {
-        chatListElement.append(`
-            <div style="padding: 40px; text-align: center; color: #95a5a6;">
-                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-                <div style="font-size: 15px;">No results found</div>
-            </div>
-        `);
-        return;
-    }
-
-    users.forEach(user => {
-        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No Name';
-        const firstLetter = name.charAt(0).toUpperCase();
-
-        const avatarContent = user.image
-            ? `<img src="${user.image}" alt="${name}" style="width: 40px; height: 40px; border-radius: 50%;">`
-            : firstLetter;
-
-        const chatItem = $(`
-            <div class="chat-item" data-user-id="${user.id}">
-                <div class="chat-avatar">
-                     ${avatarContent}
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">${name}</div>
-                    <div class="chat-preview">@${user.username || 'unknown'}</div>
-                </div>
-            </div>
-        `);
-
-        chatItem.on('click', function () {
-            openChat(user.id);
-            console.log("Open chat with user ID:", user.id);
-        });
-
-        chatListElement.append(chatItem);
-    });
-}
-
+// function renderChatListFromUsers(users) {
+//     const chatListElement = $('#chatList');
+//     chatListElement.empty();
+//
+//     if (!users || users.length === 0) {
+//         chatListElement.append(`
+//             <div style="padding: 40px; text-align: center; color: #95a5a6;">
+//                 <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+//                 <div style="font-size: 15px;">No results found</div>
+//             </div>
+//         `);
+//         return;
+//     }
+//
+//     users.forEach(user => {
+//         const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No Name';
+//         const firstLetter = name.charAt(0).toUpperCase();
+//
+//         const avatarContent = user.image
+//             ? `<img src="${user.image}" alt="${name}" style="width: 40px; height: 40px; border-radius: 50%;">`
+//             : firstLetter;
+//
+//         const chatItem = $(`
+//             <div class="chat-item" data-user-id="${user.id}">
+//                 <div class="chat-avatar">
+//                      ${avatarContent}
+//                 </div>
+//                 <div class="chat-info">
+//                     <div class="chat-name">${name}</div>
+//                     <div class="chat-preview">@${user.username || 'unknown'}</div>
+//                 </div>
+//             </div>
+//         `);
+//
+//         chatItem.on('click', function () {
+//             openChat(user.id);
+//             console.log("Open chat with user ID:", user.id);
+//         });
+//
+//         chatListElement.append(chatItem);
+//     });
+// }
 
 function showLogoutModal() {
     $('#logoutModal').addClass('active');
@@ -528,18 +509,61 @@ function saveProfile(e) {
     e.preventDefault();
 
     // Get form values
-    const fullName = $('#fullName').val();
+    const firstName = $('#firstName').val();
+    const lastName = $('#lastName').val();
     const username = $('#username').val();
-    const email = $('#email').val();
     const bio = $('#bio').val();
-
+    const fullName = `${firstName} ${lastName}`;
     // In a real app, send to backend API
-    console.log('Saving profile:', {fullName, username, email, bio});
+    console.log('Saving profile:', {fullName, username, bio});
+
+    // Data to send
+    const data = {
+        first_name: firstName,
+        last_name: lastName,
+        username: username,
+        bio: bio
+    };
+
+    // Send update request to backend
+    fetch(`${baseUrl}profile`, {
+        method: 'PATCH',  // yoki 'PATCH', backend-ga qarab
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Profile update failed');
+            }
+            return response.json();
+        })
+        .then(updatedUser => {
+            console.log('Profile updated:', updatedUser);
+
+            // Update UI
+            const initials = fullName.split(' ').map(n => n[0]).join('');
+            $('#profileAvatarLarge').text(initials);
+
+            // Success message
+            $('#successMessage').addClass('show');
+            setTimeout(() => {
+                $('#successMessage').removeClass('show');
+            }, 3000);
+
+            // Agar kerak bo'lsa, settingsPageTitle ham yangilash:
+            $('#settingsPageTitle').text(`${fullName} (${updatedUser.id})`);
+        })
+        .catch(error => {
+            console.error('Error updating profile:', error);
+            alert('Profilni yangilashda xatolik yuz berdi.');
+        });
+
 
     // Update current user info
     const initials = fullName.split(' ').map(n => n[0]).join('');
-    $('#currentUserAvatar').text(initials);
-    $('#currentUserName').text(fullName);
     $('#profileAvatarLarge').text(initials);
 
     // Show success message
@@ -549,11 +573,153 @@ function saveProfile(e) {
     }, 3000);
 }
 
+function addIncomingMessage(chatId, text, fromUserId) {
+    // Agar xabar aynan ochiq chat uchun bo‘lsa — UI ga qo‘shamiz
+
+    if (window.activeChat && window.activeChat.id === chatId) {
+        const messageEl = $(`
+            <div class="message ${fromUserId === currentUser.id ? 'sent' : 'received'}">
+                <div class="message-content">
+                    <div class="message-bubble">${text}</div>
+                    <div class="message-time">${new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</div>
+                </div>
+            </div>
+        `);
+
+        $("#messagesContainer").append(messageEl);
+
+        // Scroll pastga
+        const mc = document.getElementById('messagesContainer');
+        mc.scrollTop = mc.scrollHeight;
+    }
+
+    // SampleMessages ichiga qo‘shamiz
+    if (!sampleMessages[chatId]) sampleMessages[chatId] = [];
+    sampleMessages[chatId].push({
+        id: Date.now(),
+        message: text,
+        fromUserId: fromUserId,
+        createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+    });
+
+    // Chat preview yangilash
+    const chat = sampleChats.find(c => c.id === chatId);
+    if (chat) {
+        chat.last_message = text;
+        chat.last_message_time = "Now";
+    }
+
+    renderChatList();
+}
+
+
+// WebSocket ulanish funksiyasi
+function connectWebSocket(token) {
+    const wsUrl = `${wsBaseUrl}?auth=${encodeURIComponent(token)}`;
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+        // console.log("WebSocket connected.");
+    };
+
+    ws.onmessage = (event) => {
+        console.log("New message:", event.data);
+
+        let data;
+        try {
+            data = JSON.parse(event.data);
+        } catch (e) {
+            console.error("Invalid WS JSON", e);
+            return;
+        }
+
+        if (data.type === "chat.message") {
+            addIncomingMessage(
+                data.chat_id,
+                data.message,
+                data.from
+            );
+        }
+        // Bu yerda chatga real-time xabar qo‘shish mumkin
+    };
+
+    ws.onclose = () => {
+        console.log("WebSocket disconnected.");
+        // Istasa reconnect funksiyasi yozish mumkin
+    };
+
+    ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+    };
+
+    return ws;
+}
+
+async function initializeChatApp() {
+    try {
+        // 1) Profil ma'lumotlarini olish
+        const response = await fetch(`${baseUrl}profile`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch profile');
+        }
+
+        const user = await response.json();
+        // Global currentUser yangilash
+        currentUser = user;
+
+        // Full Name
+        const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+        $('#fullName').val(`${fullName}`);
+
+        // Username
+        $('#username').val(user.username || '');
+
+        // First name
+        $('#firstName').val(user.first_name || '');
+
+        // Last name
+        $('#lastName').val(user.last_name || '');
+
+        // Bio
+        $('#bio').val(user.bio || '');
+
+        $('#settingsPageTitle').text(`${fullName} (${user.id})`);
+
+        // Profil avatar katta — agar rasm bo'lsa, rasm, aks holda harflar
+        if (user.image) {
+            $('#profileAvatarLarge').html(
+                `<img src="${user.image}" alt="Avatar" style="width:100px; height:100px; border-radius:50%;">`
+            );
+
+        } else {
+            // Ism va familiyaning bosh harflari
+            const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+            $('#profileAvatarLarge').text(initials);
+        }
+
+    } catch (error) {
+        console.error("Initialization error:", error);
+    }
+}
+
+
 // Event listeners
 $(document).ready(function () {
-    if (accessToken) {
-        isValidToken(accessToken);
-        fetchChats();  // Sahifa yuklanganda chatlarni yuklaymiz
+    let ws;
+    if (accessToken && isValidToken(accessToken)) {
+        initializeChatApp()
+
+        fetchChats().then(() => {
+            connectWebSocket(accessToken);   // Chatlar yuklangandan keyin WS ulanish
+        });
+
     } else {
         // Token yo'q bo'lsa, ro'yxatdan o'tish sahifasiga yo'naltirish
         window.location.href = 'register.html';
@@ -568,7 +734,8 @@ $(document).ready(function () {
             // Go back to settings menu
             $('#profileSection').removeClass('active');
             $('#settingsMenu').show();
-            $('#settingsPageTitle').text('Settings');
+            const pageTitle = `${currentUser.first_name || ''} ${currentUser.last_name || ''} (${currentUser.id})`.trim();
+            $('#settingsPageTitle').text(`${pageTitle}`);
         } else {
             // Close settings sidebar
             closeSettings();
@@ -594,20 +761,20 @@ $(document).ready(function () {
     // Profile form submit
     $('#profileForm').on('submit', saveProfile);
 
-    $('#searchInput').on('input', debounce(function () {
-        const query = $(this).val().trim();
-        const clearBtn = $('#clearSearch');
-
-        if (query.length > 0) {
-            clearBtn.css('display', 'flex');
-        } else {
-            clearBtn.hide();
-        }
-
-        // API ga so‘rov
-        searchFromApi(query);
-
-    }, 300)); // 300ms debounce
+    // $('#searchInput').on('input', debounce(function () {
+    //     const query = $(this).val().trim();
+    //     const clearBtn = $('#clearSearch');
+    //
+    //     if (query.length > 0) {
+    //         clearBtn.css('display', 'flex');
+    //     } else {
+    //         clearBtn.hide();
+    //     }
+    //
+    //     // API ga so‘rov
+    //     searchFromApi(query);
+    //
+    // }, 300)); // 300ms debounce
 
     // Clear search
     $('#clearSearch').on('click', function () {
@@ -619,6 +786,9 @@ $(document).ready(function () {
 
     // Send button click
     $('#sendButton').on('click', sendMessage);
+    // $('#sendButton').on('click', function () {
+    //     sendMessage(ws);
+    // });
 
     // Enter key to send
     $('#messageInput').on('keypress', function (e) {
@@ -659,19 +829,19 @@ $(document).ready(function () {
         });
     }
 
-    // Simulate receiving a message after 5 seconds
-    setTimeout(() => {
-        if (activeChat && activeChat.id === 1) {
-            const newMessage = {
-                id: Date.now(),
-                message: "I'd love to hear more about it!",
-                fromUserId: 2,
-                isRead: false,
-                isEdited: false,
-                createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
-            };
-            sampleMessages[1].push(newMessage);
-            renderMessages(1);
-        }
-    }, 5000);
+    // // Simulate receiving a message after 5 seconds
+    // setTimeout(() => {
+    //     if (activeChat && activeChat.id === 1) {
+    //         const newMessage = {
+    //             id: Date.now(),
+    //             message: "I'd love to hear more about it!",
+    //             fromUserId: 2,
+    //             is_read: false,
+    //             is_edited: false,
+    //             createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+    //         };
+    //         sampleMessages[1].push(newMessage);
+    //         renderMessages(1);
+    //     }
+    // }, 5000);
 });
