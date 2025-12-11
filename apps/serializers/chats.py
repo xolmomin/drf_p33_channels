@@ -1,5 +1,6 @@
 from django.utils.timezone import now
-from rest_framework.fields import IntegerField, ListField, CharField, DateTimeField
+from rest_framework.exceptions import ValidationError
+from rest_framework.fields import IntegerField, CharField, DateTimeField
 from rest_framework.serializers import ModelSerializer
 
 from apps.models import Chat, User, Message
@@ -14,6 +15,7 @@ class ChatListModelSerializer(ModelSerializer):
     class Meta:
         model = Chat
         fields = 'id', 'name', 'type', 'image', 'unread_count', 'is_online', 'last_message', 'last_message_time'
+        read_only_fields = ['image']
 
     def to_representation(self, instance: Chat):
         repr = super().to_representation(instance)
@@ -31,14 +33,20 @@ class ChatListModelSerializer(ModelSerializer):
 
 
 class ChatCreateModelSerializer(ModelSerializer):
-    chat_id = IntegerField()
+    chat_id = IntegerField(write_only=True)
+    name = CharField(required=False)
 
     class Meta:
         model = Chat
-        fields = 'name', 'chat_id'
+        fields = 'name', 'chat_id', 'type'
 
     def validate(self, attrs):
-        chat = attrs.get('type')
+        chat_type = attrs.get('type')
+
+        if chat_type == Chat.Type.PRIVATE and not Chat.objects.filter(id=attrs['chat_id']).exists():
+            raise ValidationError('Chat with this id does not exist')
+
+        self.member_id = attrs.pop('chat_id', None)
         return attrs
 
 

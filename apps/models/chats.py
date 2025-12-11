@@ -1,4 +1,4 @@
-from django.db.models import TextField, ForeignKey, SET_NULL, ManyToManyField, CASCADE, ImageField
+from django.db.models import TextField, ForeignKey, SET_NULL, ManyToManyField, CASCADE, ImageField, Count
 from django.db.models.enums import TextChoices
 from django.db.models.fields import CharField, BooleanField
 
@@ -10,7 +10,7 @@ class Chat(CreatedBaseModel):
         PRIVATE = 'private', 'Private'
         GROUP = 'group', 'Group'
 
-    name = CharField(max_length=70)
+    name = CharField(max_length=70, null=False, blank=True)
     image = ImageField(upload_to='group/images/%Y/%m/%d', null=True, blank=True)
     type = CharField(max_length=10, choices=Type.choices, default=Type.PRIVATE)
     members = ManyToManyField('apps.User', related_name='chats')
@@ -18,13 +18,47 @@ class Chat(CreatedBaseModel):
     def __str__(self):
         return self.name
 
-    def create_group(self, user):
-        obj, created = self.__class__.objects.get_or_create(members=user, type=self.Type.GROUP)
-        return obj, created
+    @staticmethod
+    def create_group(initiator_user):
+        """Yangi guruh chatini yaratadi (mavjudligini tekshirmaydi)."""
+        chat = Chat.objects.create(type=Chat.Type.GROUP, name="Yangi Guruh")
+        chat.members.add(initiator_user)
+        return chat, True
 
-    def create_private(self, user):
-        obj, created = self.__class__.objects.get_or_create(members=user, type=self.Type.PRIVATE)
-        return obj, created
+    @staticmethod
+    def create_private(user1, user2):
+        """
+        user1 va user2 orasida mavjud bo'lgan shaxsiy chatni qidiradi.
+        Agar topilmasa, yangisini yaratadi.
+        """
+        # 1. Shaxsiy chat mavjudligini tekshirish:
+        # Chat turi 'PRIVATE' bo'lishi,
+        # va chat a'zolari orasida user1 va user2 lar bo'lishi shart.
+        existing_chat = Chat.objects.filter(
+            type=Chat.Type.PRIVATE,
+            members=user1
+        ).filter(
+            members=user2
+        ).annotate(
+            # Ixtiyoriy: Faqat 2 ta a'zosi borligini tekshirish (aniqlik uchun)
+            member_count=Count('members')
+        ).filter(
+            member_count=2
+        ).first()
+
+        if existing_chat:
+            return existing_chat, False  # Chat topildi
+
+        # 2. Yangi shaxsiy chatni yaratish:
+        # name maydoni bo'sh qoldiriladi
+        new_chat = Chat.objects.create(type=Chat.Type.PRIVATE)
+        new_chat.members.add(user1, user2)  # Ikkala foydalanuvchini qo'shish
+
+        return new_chat, True  # Yangi chat yaratildi
+
+    def add_member(self, user):
+        """Chatga yangi a'zo qo'shish (asosan Group uchun)."""
+        self.members.add(user)
 
     @property
     def is_group(self):

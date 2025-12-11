@@ -21,49 +21,9 @@ async function isValidToken(token) {
 }
 
 // Sample data structure matching Django models
-const sampleChats = [{
-    id: 1,
-    name: "Sarah Wilson",
-    type: "private",
-    image: null,
-    last_message: "Hey! How are you doing?",
-    last_message_time: "10:30 AM",
-    unread_count: 2,
-    is_online: true,
-    members: [1, 2]
-}, {
-    id: 2,
-    name: "Project Team",
-    type: "group",
-    image: null,
-    last_message: "Meeting at 3 PM today",
-    last_message_time: "9:15 AM",
-    unread_count: 5,
-    is_online: false,
-    members: [1, 3, 4, 5]
-}, {
-    id: 3,
-    name: "Mike Johnson",
-    type: "private",
-    image: null,
-    last_message: "Thanks for your help!",
-    last_message_time: "Yesterday",
-    unread_count: 0,
-    is_online: true,
-    members: [1, 3]
-}, {
-    id: 4,
-    name: "Design Team",
-    type: "group",
-    image: null,
-    last_message: "New mockups are ready",
-    last_message_time: "Yesterday",
-    unread_count: 0,
-    is_online: false,
-    members: [1, 6, 7, 8]
-}];
+const sampleChats = [];
 
-const sampleMessages = {};
+const sampleMessages = [];
 
 let currentUser = null;
 let activeChat = null;
@@ -79,6 +39,10 @@ const defaultConfig = {
     send_button_text: "Send",
     search_placeholder: "Search chats..."
 };
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Initialize chat list
 function renderChatList() {
@@ -144,7 +108,7 @@ function debounce(func, delay) {
 function searchFromApi(query) {
 
     if (!query) {
-        renderChatList([]);
+        fetchChats();
         return;
     }
 
@@ -161,28 +125,28 @@ function searchFromApi(query) {
 }
 
 function renderMessagesFromApi(chat) {
-    const container = $("#messagesContainer");
-    container.empty();
+    const messagesContainer = $("#messagesContainer");
+    messagesContainer.empty();
 
     if (!chat.messages || chat.messages.length === 0) {
-        container.append(`<div class="empty-messages"></div>`);
+        messagesContainer.append(`<div class="empty-messages"></div>`);
         return;
     }
 
     chat.messages.forEach(msg => {
-        container.append(`
+        messagesContainer.append(`
             <div class="message ${msg.isSent ? 'sent' : 'received'}">
                 <div class="message-content">
                     <div class="message-bubble">${msg.message}</div>
                     <div class="message-time">
                         ${msg.created_at}
-                        ${msg.isSent ? '<span class="message-status">✓���</span>' : ''}
+                        ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
                     </div>
                 </div>
             </div>
         `);
     });
-    container.scrollTop(container[0].scrollHeight);
+    messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
 }
 
 // Open specific chat
@@ -249,9 +213,7 @@ async function openChat(chatId) {
 
     // Xabarlarni yuklash
     renderMessagesFromApi(activeChat);
-    console.log(activeChat.messages);
 
-    console.log('xatolik')
     // Unread badge yo‘q qilinadi
     activeChat.unread_count = 0;
     $(`.chat-item[data-chat-id="${chatId}"] .unread-badge`).remove();
@@ -291,21 +253,19 @@ async function openChat(chatId) {
 // }
 
 // Render messages for active chat
-function renderMessages(chatId) {
+function renderMessages() {
     const messagesContainer = $('#messagesContainer');
     messagesContainer.empty();
 
-    const messages = sampleMessages[chatId] || [];
-
-    messages.forEach(msg => {
-        // const isSent = msg.fromUserId === currentUser.id;
+    sampleMessages.forEach(msg => {
+        const isSent = msg.from === currentUser.id;
         const messageElement = $(`
-                    <div class="message ${msg.isSent ? 'sent' : 'received'}">
+                    <div class="message ${isSent ? 'sent' : 'received'}">
                         <div class="message-content">
                             <div class="message-bubble">${msg.message}</div>
                             <div class="message-time">
                                 ${msg.created_at}
-                                ${msg.isSent ? '<span class="message-status">✓���</span>' : ''}
+                                ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -318,7 +278,7 @@ function renderMessages(chatId) {
 }
 
 // Send message
-function sendMessage() {
+async function sendMessage() {
     const input = $('#messageInput');
     const message = input.val().trim();
 
@@ -328,28 +288,38 @@ function sendMessage() {
 
     // Create new message
     const newMessage = {
-        id: Date.now(),
         message: message,
-        fromUserId: currentUser.id,
-        isRead: false,
-        isEdited: false,
-        createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+        from: currentUser.id,
+        is_read: false,
+        is_edited: false,
+        created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
     };
 
-    // Add to messages
-    if (!sampleMessages[activeChat.id]) {
-        sampleMessages[activeChat.id] = [];
-    }
-    sampleMessages[activeChat.id].push(newMessage);
+    sampleMessages.push(newMessage);
 
     // Update chat preview
     activeChat.last_message = message;
     activeChat.last_message_time = "Just now";
 
     // Re-render
-    console.log('shu yerda');
-    renderMessages(activeChat.id);
-    renderChatList();
+    // renderMessages();
+    const messagesContainer = $('#messagesContainer');
+    const isSent = newMessage.from === currentUser.id;
+    const messageElement = $(`
+                    <div class="message ${isSent ? 'sent' : 'received'}">
+                        <div class="message-content">
+                            <div class="message-bubble">${newMessage.message}</div>
+                            <div class="message-time">
+                                ${newMessage.created_at}
+                                ${newMessage.isSent ? '<span class="message-status">✓✓</span>' : ''}
+                            </div>
+                        </div>
+                    </div>
+                `);
+    messagesContainer.append(messageElement);
+    messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+
+
     $(`.chat-item[data-chat-id="${activeChat.id}"]`).addClass('active');
 
     // Clear input
@@ -361,8 +331,10 @@ function sendMessage() {
         'message': message,
         'chat_id': activeChat.id
     });
-    console.log(msg);
     ws.send(msg);
+    await sleep(500);
+    $('#searchInput').val('')
+    await fetchChats();
 }
 
 // Handle typing indicator
@@ -438,48 +410,47 @@ async function fetchChats() {
     }
 }
 
-// function renderChatListFromUsers(users) {
-//     const chatListElement = $('#chatList');
-//     chatListElement.empty();
-//
-//     if (!users || users.length === 0) {
-//         chatListElement.append(`
-//             <div style="padding: 40px; text-align: center; color: #95a5a6;">
-//                 <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
-//                 <div style="font-size: 15px;">No results found</div>
-//             </div>
-//         `);
-//         return;
-//     }
-//
-//     users.forEach(user => {
-//         const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No Name';
-//         const firstLetter = name.charAt(0).toUpperCase();
-//
-//         const avatarContent = user.image
-//             ? `<img src="${user.image}" alt="${name}" style="width: 40px; height: 40px; border-radius: 50%;">`
-//             : firstLetter;
-//
-//         const chatItem = $(`
-//             <div class="chat-item" data-user-id="${user.id}">
-//                 <div class="chat-avatar">
-//                      ${avatarContent}
-//                 </div>
-//                 <div class="chat-info">
-//                     <div class="chat-name">${name}</div>
-//                     <div class="chat-preview">@${user.username || 'unknown'}</div>
-//                 </div>
-//             </div>
-//         `);
-//
-//         chatItem.on('click', function () {
-//             openChat(user.id);
-//             console.log("Open chat with user ID:", user.id);
-//         });
-//
-//         chatListElement.append(chatItem);
-//     });
-// }
+function renderChatListFromUsers(users) {
+    const chatListElement = $('#chatList');
+    chatListElement.empty();
+
+    if (!users || users.length === 0) {
+        chatListElement.append(`
+            <div style="padding: 40px; text-align: center; color: #95a5a6;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🔍</div>
+                <div style="font-size: 15px;">No results found</div>
+            </div>
+        `);
+        return;
+    }
+
+    users.forEach(user => {
+        const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No Name';
+        const firstLetter = name.charAt(0).toUpperCase();
+
+        const avatarContent = user.image
+            ? `<img src="${user.image}" alt="${name}" style="width: 40px; height: 40px; border-radius: 50%;">`
+            : firstLetter;
+
+        const chatItem = $(`
+            <div class="chat-item" data-user-id="${user.id}">
+                <div class="chat-avatar">
+                     ${avatarContent}
+                </div>
+                <div class="chat-info">
+                    <div class="chat-name">${name}</div>
+                    <div class="chat-preview">@${user.username || 'unknown'}</div>
+                </div>
+            </div>
+        `);
+
+        chatItem.on('click', function () {
+            openChat(user.id);
+        });
+
+        chatListElement.append(chatItem);
+    });
+}
 
 function showLogoutModal() {
     $('#logoutModal').addClass('active');
@@ -593,14 +564,14 @@ function addIncomingMessage(chatId, text, fromUserId) {
         mc.scrollTop = mc.scrollHeight;
     }
 
-    // SampleMessages ichiga qo‘shamiz
-    if (!sampleMessages[chatId]) sampleMessages[chatId] = [];
-    sampleMessages[chatId].push({
-        id: Date.now(),
-        message: text,
-        fromUserId: fromUserId,
-        createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
-    });
+    // // SampleMessages ichiga qo‘shamiz
+    // sampleMessages.push({
+    //     message: text,
+    //     from: fromUserId,
+    //     is_read:false,
+    //     is_edited:false,
+    //     created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+    // });
 
     // Chat preview yangilash
     const chat = sampleChats.find(c => c.id === chatId);
@@ -761,27 +732,25 @@ $(document).ready(function () {
     // Profile form submit
     $('#profileForm').on('submit', saveProfile);
 
-    // $('#searchInput').on('input', debounce(function () {
-    //     const query = $(this).val().trim();
-    //     const clearBtn = $('#clearSearch');
-    //
-    //     if (query.length > 0) {
-    //         clearBtn.css('display', 'flex');
-    //     } else {
-    //         clearBtn.hide();
-    //     }
-    //
-    //     // API ga so‘rov
-    //     searchFromApi(query);
-    //
-    // }, 300)); // 300ms debounce
+    $('#searchInput').on('input', debounce(function () {
+        const query = $(this).val().trim();
+        const clearBtn = $('#clearSearch');
+
+        if (query.length > 0) {
+            clearBtn.css('display', 'flex');
+        } else {
+            clearBtn.hide();
+        }
+        // API ga so‘rov
+        searchFromApi(query);
+    }, 300)); // 300ms debounce
 
     // Clear search
     $('#clearSearch').on('click', function () {
         searchQuery = '';
         $('#searchInput').val('');
         $(this).hide();
-        renderChatList();
+        fetchChats();
     });
 
     // Send button click

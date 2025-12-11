@@ -44,10 +44,10 @@ agar group bolsa 998901001111
 
 
 keyingi darsda
-1. 1-1, group
-
-2. is_read, is_edited
+1. group
+2. is_read, is_edited, send, typing
 3. online statusni olish
+
 
 
 
@@ -55,15 +55,21 @@ keyingi darsda
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMxMTc5LCJpYXQiOjE3NjQ4MjcxNzksImp0aSI6IjMzODJkMGRmYmJiZjRmZmNiMjIzMGM0M2UwNzY0OTAzIiwidXNlcl9pZCI6IjEwMCJ9.4UakkOS9SAKH96ADs68tFE3s6aKjfk0VwiuC1StUNKw
 
 1 - 901001001 gayrat
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMzNTA5LCJpYXQiOjE3NjQ4Mjk1MDksImp0aSI6IjUxMGFmYjJmZWUxYjRkODM5NGFlMjM0NDYxM2E5NjA1IiwidXNlcl9pZCI6IjEifQ.UvOReehmSucuiPZ9uncpGfkhX180ajgX2EcLZEMyJBo
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk1OTMzNTA5LCJpYXQiOjE3NjQ4Mjk1MDksImp0aSI6IjUxMGFmYjJmZWUxYjRkODM5NGFlMjM0NDYxM2E5NjA1IiwidXNlcl9pZCI6IjEifQ.UvOReehmSucuiPZ9uncpGfkhX180ajgX2EcLZEMyJBo
 
 2 - 901001002 botir
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk2MDk5MTg5LCJpYXQiOjE3NjQ5OTUxODksImp0aSI6IjA0ODk3ZTlhYzcxMjRhYTJiMjRkN2ZiNTY4ZGU0NWU2IiwidXNlcl9pZCI6IjIifQ.Vv98Jcvh3TvnHlrq3uumhuAIB7-Fn_BIA2dlEoQEH58
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk2MDk5MTg5LCJpYXQiOjE3NjQ5OTUxODksImp0aSI6IjA0ODk3ZTlhYzcxMjRhYTJiMjRkN2ZiNTY4ZGU0NWU2IiwidXNlcl9pZCI6IjIifQ.Vv98Jcvh3TvnHlrq3uumhuAIB7-Fn_BIA2dlEoQEH58
 
 
+16 - 901001016 yaxshiboy
+ws://localhost:8000/chat?auth=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzk2NTM0NDIxLCJpYXQiOjE3NjU0MzA0MjEsImp0aSI6ImM0ZTIwYTVhZjlkMDQ3MzRiOTAxMGU0YzlhMzZhMzUzIiwidXNlcl9pZCI6IjE2In0.4oedrLZDJfzoyi8hl6IZ4sRQo7QIibPR79mP53CbQGg
 
 http://localhost:3000/frontend/index.html
 http://127.0.0.1:3000/frontend/index.html
+
+
+10.30.3.4:3000/frontend/index.html
+
 
 
 ## API Endpoints

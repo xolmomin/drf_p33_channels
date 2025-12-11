@@ -1,5 +1,6 @@
 const accessToken = localStorage.getItem('access_token');
-const baseUrl = 'http://localhost:8000/api/v1/';
+const hostName = window.location.hostname;
+const baseUrl = `http://${hostName}:8000/api/v1/`;
 
 
 async function isValidToken(token) {
