@@ -470,6 +470,72 @@ body {
     padding: 8px;
 }
 
+.message-time {
+    font-size: 11px;
+    color: #999;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Loading spinner styles */
+.loading-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ddd;
+    border-top-color: #667eea;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Chat preview uchun typing indikator */
+.chat-preview.typing {
+    color: #3498db;
+    font-style: italic;
+    animation: typing-pulse 1.5s ease-in-out infinite;
+}
+
+.chat-preview.typing::before {
+    content: "typing";
+    margin-right: 4px;
+}
+
+.chat-preview.typing::after {
+    content: "";
+    animation: typing-dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes typing-dots {
+    0%, 20% {
+        content: "";
+    }
+    40% {
+        content: ".";
+    }
+    60% {
+        content: "..";
+    }
+    80%, 100% {
+        content: "...";
+    }
+}
+
+@keyframes typing-pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
 .chat-item {
     padding: 16px;
     margin-bottom: 4px;
@@ -596,9 +662,24 @@ body {
 }
 
 .typing-indicator {
-    font-size: 13px;
-    color: #667eea;
+    color: #3498db;
     font-style: italic;
+    font-size: 13px;
+    animation: typing-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes typing-pulse {
+    0%, 100% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Smooth transition */
+#activeChatStatus, #typingIndicator {
+    transition: opacity 0.2s ease-in-out;
 }
 
 .messages-container {
@@ -665,6 +746,100 @@ body {
     display: flex;
     align-items: center;
     gap: 4px;
+}
+
+/* Edit button */
+.message.sent .message-bubble {
+    position: relative;
+    cursor: pointer;
+}
+
+.message.sent .message-bubble:hover .edit-icon {
+    opacity: 1;
+}
+
+.edit-icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.edit-icon:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+/* Edit mode */
+.message-bubble.editing {
+    background: #e3f2fd !important;
+    border: 2px solid #2196F3;
+}
+
+/* Edit input */
+.edit-input {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+}
+
+/* Edit actions */
+.edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: flex-end;
+}
+
+.edit-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.edit-btn.save {
+    background: #2196F3;
+    color: white;
+}
+
+.edit-btn.save:hover {
+    background: #1976D2;
+}
+
+.edit-btn.cancel {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.edit-btn.cancel:hover {
+    background: #bdbdbd;
+}
+
+/* Edited label */
+.edited-label {
+    font-size: 11px;
+    color: #95a5a6;
+    font-style: italic;
+    margin-left: 5px;
 }
 
 .message.sent .message-time {

@@ -1,7 +1,7 @@
 from asgiref.sync import sync_to_async
 
 from apps.consumers import CustomAsyncJsonWebsocketConsumer
-from apps.models import User, Chat
+from apps.models import User, Chat, Message
 
 
 class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
@@ -15,6 +15,10 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
     def get_user_chats(self):
         # Foydalanuvchi a'zo bo'lgan barcha chat ID larini olish
         return list(self.from_user.chats.values_list('id', flat=True))
+
+    @sync_to_async
+    def read_last_msg(self, from_user_id, chat_id):
+        Message.objects.filter(chat_id=chat_id, from_user_id=from_user_id).update(is_read=True)
 
     @sync_to_async
     def is_member(self, chat_id):
@@ -89,11 +93,6 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
             await self.change_status(False)
 
     async def receive_json(self, content, **kwargs):
-        required_fields = {'message', 'chat_id'}
-        result = required_fields.intersection(set(content))
-        if not (len(result) == len(required_fields) and result == required_fields):
-            await self.send_json({'message': f"required fields '{', '.join(required_fields)}'"})
-            return
 
         self.chat_id = content['chat_id']
         self.chat = await Chat.objects.filter(id=self.chat_id).afirst()
@@ -103,9 +102,36 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
             if _user is None:
                 await self.send_json({'message': "Chat not found"})
                 return
-            self.chat = await self.create_private(self.from_user, _user)
+            if content.get('type') == 'typing':
+                return
 
+            self.chat = await self.create_private(self.from_user, _user)
             content['chat_id'] = self.chat.id
+
+        if content.get('type') == 'typing':
+            await self.channel_layer.group_send(
+                str(content['chat_id']),
+                {
+                    "type": "chat.typing",
+                    "chat_id": self.chat_id,
+                    "from": self.from_user.id,
+                    "is_typing": content['is_typing']
+                }
+            )
+            return
+
+        if content.get('is_read', None):
+            await self.read_last_msg(self.from_user.id, self.chat_id)
+            await self.channel_layer.group_send(
+                str(content['chat_id']),
+                {
+                    "type": "chat.action",
+                    "chat_id": self.chat_id,
+                    "from": self.from_user.id,
+                    'is_read': True
+                }
+            )
+            return
 
         await self.save_msg(from_user_id=self.from_user.id, **content)
 
@@ -123,4 +149,17 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
 
     async def chat_message(self, event):
         if self.from_user.id != event['from']:
+            event['type'] = 'message'
+            await self.send_json(event)
+        else:
+            await self.send_json({"type": "action", "accepted": True})
+
+    async def chat_action(self, event):
+        if self.from_user.id != event['from']:
+            event['type'] = 'action'
+            await self.send_json(event)
+
+    async def chat_typing(self, event):
+        if self.from_user.id != event['from']:
+            event['type'] = 'typing'
             await self.send_json(event)

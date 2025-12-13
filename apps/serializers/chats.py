@@ -1,4 +1,3 @@
-from django.utils.timezone import now
 from rest_framework.exceptions import ValidationError
 from rest_framework.fields import IntegerField, CharField, DateTimeField
 from rest_framework.serializers import ModelSerializer
@@ -7,10 +6,10 @@ from apps.models import Chat, User, Message
 
 
 class ChatListModelSerializer(ModelSerializer):
-    unread_count = IntegerField(default=2, read_only=True)
+    unread_count = IntegerField(read_only=True)
     is_online = IntegerField(default=False, read_only=True)
-    last_message = CharField(default='oxirgi xabar', read_only=True)
-    last_message_time = DateTimeField(default=now(), read_only=True, format='%H:%M:%S')
+    last_message = CharField(read_only=True)
+    last_message_time = DateTimeField(read_only=True, format='%H:%M:%S')
 
     class Meta:
         model = Chat

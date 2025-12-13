@@ -45,8 +45,16 @@ agar group bolsa 998901001111
 
 keyingi darsda
 1. group
-2. is_read, is_edited, send, typing
+2. send, is_read, typing, last_message
+
 3. online statusni olish
+4. is_edited
+5. pytest
+
+send file, edit msg, clear msg, delete chat, reply msg, call, video call
+
+
+
 
 
 
@@ -68,7 +76,7 @@ http://localhost:3000/frontend/index.html
 http://127.0.0.1:3000/frontend/index.html
 
 
-10.30.3.4:3000/frontend/index.html
+10.30.4.116:3000/frontend/index.html
 
 
 

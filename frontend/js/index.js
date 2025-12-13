@@ -27,7 +27,12 @@ const sampleMessages = [];
 
 let currentUser = null;
 let activeChat = null;
+
 let typingTimeout = null;
+let stopTypingTimeout = null;
+let typingUsers = new Set();
+let chatTypingTimeouts = {}; // Har bir chat uchun typing timeout
+
 let searchQuery = '';
 let ws = null;
 
@@ -124,6 +129,143 @@ function searchFromApi(query) {
     });
 }
 
+// HTML escape funksiyasi
+function escapeHtml(text) {
+    return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// Edit mode ni boshlash
+function startEditMessage(event, messageId, currentText) {
+    event.stopPropagation();
+
+    // Agar boshqa xabar edit qilinayotgan bo'lsa, bekor qilish
+    if (editingMessageId) {
+        cancelEditMessage(editingMessageId);
+    }
+
+    editingMessageId = messageId;
+
+    const messageEl = $(`.message[data-message-id="${messageId}"]`);
+    const bubbleEl = messageEl.find('.message-bubble');
+    const textEl = messageEl.find('.message-text');
+
+    // Edit icon ni yashirish
+    bubbleEl.find('.edit-icon').hide();
+
+    // Edit mode
+    bubbleEl.addClass('editing');
+
+    // Text ni input bilan almashtirish
+    const originalText = textEl.text();
+    textEl.html(`
+        <textarea class="edit-input" id="editInput_${messageId}">${originalText}</textarea>
+        <div class="edit-actions">
+            <button class="edit-btn cancel" onclick="cancelEditMessage(${messageId})">Cancel</button>
+            <button class="edit-btn save" onclick="saveEditMessage(${messageId})">Save</button>
+        </div>
+    `);
+
+    // Focus input
+    const input = $(`#editInput_${messageId}`);
+    input.focus();
+    input[0].setSelectionRange(input.val().length, input.val().length);
+
+    // Enter tugmasi bilan saqlash
+    input.on('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            saveEditMessage(messageId);
+        } else if (e.key === 'Escape') {
+            cancelEditMessage(messageId);
+        }
+    });
+}
+
+// Edit ni bekor qilish
+function cancelEditMessage(messageId) {
+    const messageEl = $(`.message[data-message-id="${messageId}"]`);
+    const bubbleEl = messageEl.find('.message-bubble');
+    const textEl = messageEl.find('.message-text');
+
+    // Original textni qaytarish
+    const originalText = $(`#editInput_${messageId}`).val();
+    textEl.text(originalText);
+
+    // Edit mode ni o'chirish
+    bubbleEl.removeClass('editing');
+    bubbleEl.find('.edit-icon').show();
+
+    editingMessageId = null;
+}
+
+// Edit ni saqlash
+async function saveEditMessage(messageId) {
+    const input = $(`#editInput_${messageId}`);
+    const newText = input.val().trim();
+
+    if (!newText) {
+        alert('Message cannot be empty');
+        return;
+    }
+
+    const messageEl = $(`.message[data-message-id="${messageId}"]`);
+    const originalText = messageEl.find('.message-text').text();
+
+    // Agar o'zgarmagan bo'lsa
+    if (newText === originalText) {
+        cancelEditMessage(messageId);
+        return;
+    }
+
+    try {
+        // API ga so'rov yuborish
+        const response = await fetch(`${baseUrl}messages/${messageId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({message: newText})
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to update message');
+        }
+
+        const data = await response.json();
+
+        // UI ni yangilash
+        const bubbleEl = messageEl.find('.message-bubble');
+        const textEl = messageEl.find('.message-text');
+        const timeEl = messageEl.find('.message-time');
+
+        textEl.text(newText);
+        bubbleEl.removeClass('editing');
+        bubbleEl.find('.edit-icon').show();
+
+        // Edited label qo'shish
+        if (!timeEl.find('.edited-label').length) {
+            timeEl.find('.message-status').before('<span class="edited-label">(edited)</span>');
+        }
+
+        // WebSocket orqali boshqa userlarga xabar yuborish
+        if (ws && window.activeChat) {
+            ws.send(JSON.stringify({
+                type: 'edit_message',
+                message_id: messageId,
+                message: newText,
+                chat_id: window.activeChat.id
+            }));
+        }
+
+        editingMessageId = null;
+
+    } catch (error) {
+        console.error('Error updating message:', error);
+        alert('Failed to update message');
+    }
+}
+
 function renderMessagesFromApi(chat) {
     const messagesContainer = $("#messagesContainer");
     messagesContainer.empty();
@@ -134,12 +276,19 @@ function renderMessagesFromApi(chat) {
     }
 
     chat.messages.forEach(msg => {
+        const editedLabel = msg.is_edited ? '<span class="edited-label">(edited)</span>' : '';
+        const editIcon = msg.isSent ? '<div class="edit-icon" onclick="startEditMessage(event, ' + msg.id + ', \'' + escapeHtml(msg.message) + '\')">✏️</div>' : '';
+
         messagesContainer.append(`
-            <div class="message ${msg.isSent ? 'sent' : 'received'}">
+            <div class="message ${msg.isSent ? 'sent' : 'received'}" data-message-id="${msg.id}">
                 <div class="message-content">
-                    <div class="message-bubble">${msg.message}</div>
+                    <div class="message-bubble">
+                        ${editIcon}
+                        <span class="message-text">${msg.message}</span>
+                    </div>
                     <div class="message-time">
                         ${msg.created_at}
+                        ${editedLabel}
                         ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
                     </div>
                 </div>
@@ -149,9 +298,120 @@ function renderMessagesFromApi(chat) {
     messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
 }
 
+// Chat list da typing ko'rsatish
+function showChatListTyping(chatId, userId) {
+    if (userId === currentUser.id) return;
+
+    const chat = sampleChats.find(c => c.id === chatId);
+    if (!chat) return;
+
+    chat.is_typing = true;
+
+    // To'g'ri selector - avval chat-item ni topamiz, keyin ichidan preview ni olamiz
+    const chatItem = $(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatItem.length) {
+        const previewEl = chatItem.find('.chat-preview');
+        if (previewEl.length) {
+            previewEl.addClass('typing').text('');
+        }
+    }
+
+    if (chatTypingTimeouts[chatId]) {
+        clearTimeout(chatTypingTimeouts[chatId]);
+    }
+
+    chatTypingTimeouts[chatId] = setTimeout(() => {
+        hideChatListTyping(chatId);
+    }, 500);
+}
+
+// Chat list da typing yashirish
+function hideChatListTyping(chatId) {
+    const chat = sampleChats.find(c => c.id === chatId);
+    if (!chat) return;
+
+    chat.is_typing = false;
+
+    // To'g'ri selector
+    const chatItem = $(`.chat-item[data-chat-id="${chatId}"]`);
+    if (chatItem.length) {
+        const previewEl = chatItem.find('.chat-preview');
+        if (previewEl.length) {
+            previewEl.removeClass('typing').text(chat.last_message || '');
+        }
+    }
+
+    if (chatTypingTimeouts[chatId]) {
+        clearTimeout(chatTypingTimeouts[chatId]);
+        delete chatTypingTimeouts[chatId];
+    }
+}
+
+// Typing indikatorni ko'rsatish (chat header da)
+function showTypingIndicator(chatId, userId) {
+    const activeChat = window.activeChat;
+
+    // Faqat ochiq chatda ko'rsatamiz
+    if (!activeChat || activeChat.id !== chatId) return;
+
+    // O'zimizning typing ni ko'rsatmaymiz
+    if (userId === currentUser.id) return;
+
+    typingUsers.add(userId);
+
+    // Header dagi typing indikatorni ko'rsatamiz
+    const typingIndicator = $('#typingIndicator');
+    const statusText = $('#activeChatStatus');
+
+    // Online yozuvini yashiramiz
+    statusText.hide();
+
+    // Typing indikatorni ko'rsatamiz
+    const config = window.elementSdk?.config || defaultConfig;
+    typingIndicator.text(config.typing_indicator_text || 'typing...').show();
+
+    // Avvalgi timeout ni tozalaymiz
+    if (stopTypingTimeout) {
+        clearTimeout(stopTypingTimeout);
+    }
+
+    // 0.5 sekunddan keyin avtomatik yashiramiz
+    stopTypingTimeout = setTimeout(() => {
+        hideTypingIndicator(chatId, userId);
+    }, 500);
+}
+
+// Typing indikatorni yashirish (chat header da)
+function hideTypingIndicator(chatId, userId) {
+    const activeChat = window.activeChat;
+    if (!activeChat || activeChat.id !== chatId) return;
+
+    typingUsers.delete(userId);
+
+    if (typingUsers.size === 0) {
+        // Typing indikatorni yashiramiz
+        $('#typingIndicator').hide();
+
+        // Online yozuvini qaytaramiz
+        const statusText = $('#activeChatStatus');
+        const config = window.elementSdk?.config || defaultConfig;
+        statusText.text(activeChat.is_online ? config.online_status_text : config.offline_status_text).show();
+    }
+}
+
 // Open specific chat
 async function openChat(chatId) {
     let activeChat = null;
+
+    $('#typingIndicator').removeClass('show');
+
+    // Chat list dagi typing ni ham tozalaymiz
+    Object.keys(chatTypingTimeouts).forEach(id => {
+        if (chatTypingTimeouts[id]) {
+            clearTimeout(chatTypingTimeouts[id]);
+            delete chatTypingTimeouts[id];
+        }
+    });
 
     try {
         // API’dan olishga harakat
@@ -252,30 +512,30 @@ async function openChat(chatId) {
 //     $('#messageInput').focus();
 // }
 
-// Render messages for active chat
-function renderMessages() {
-    const messagesContainer = $('#messagesContainer');
-    messagesContainer.empty();
-
-    sampleMessages.forEach(msg => {
-        const isSent = msg.from === currentUser.id;
-        const messageElement = $(`
-                    <div class="message ${isSent ? 'sent' : 'received'}">
-                        <div class="message-content">
-                            <div class="message-bubble">${msg.message}</div>
-                            <div class="message-time">
-                                ${msg.created_at}
-                                ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                `);
-        messagesContainer.append(messageElement);
-    });
-
-    // Scroll to bottom
-    messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
-}
+// // Render messages for active chat
+// function renderMessages() {
+//     const messagesContainer = $('#messagesContainer');
+//     messagesContainer.empty();
+//
+//     sampleMessages.forEach(msg => {
+//         const isSent = msg.from === currentUser.id;
+//         const messageElement = $(`
+//                     <div class="message ${isSent ? 'sent' : 'received'}">
+//                         <div class="message-content">
+//                             <div class="message-bubble">${msg.message}</div>
+//                             <div class="message-time">
+//                                 ${msg.created_at}
+//                                 ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
+//                             </div>
+//                         </div>
+//                     </div>
+//                 `);
+//         messagesContainer.append(messageElement);
+//     });
+//
+//     // Scroll to bottom
+//     messagesContainer.scrollTop(messagesContainer[0].scrollHeight);
+// }
 
 // Send message
 async function sendMessage() {
@@ -295,6 +555,15 @@ async function sendMessage() {
         created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
     };
 
+    // Typing timeout larni tozalaymiz
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+    }
+    if (stopTypingTimeout) {
+        clearTimeout(stopTypingTimeout);
+    }
+
+
     sampleMessages.push(newMessage);
 
     // Update chat preview
@@ -311,7 +580,7 @@ async function sendMessage() {
                             <div class="message-bubble">${newMessage.message}</div>
                             <div class="message-time">
                                 ${newMessage.created_at}
-                                ${newMessage.isSent ? '<span class="message-status">✓✓</span>' : ''}
+                                <span class="loading-spinner"></span>
                             </div>
                         </div>
                     </div>
@@ -339,14 +608,35 @@ async function sendMessage() {
 
 // Handle typing indicator
 function handleTyping() {
-    if (!activeChat) return;
+    const activeChat = window.activeChat;
+    if (!activeChat || !ws) return;
 
-    // In a real app, send typing status via WebSocket
-    // chatSocket.send(JSON.stringify({
-    //     'type': 'typing',
-    //     'chat_id': activeChat.id
-    // }));
+    const msg = JSON.stringify({
+        'type': 'typing',
+        'chat_id': activeChat.id,
+        'is_typing': true
+    });
+    ws.send(msg);
+
+    // Avvalgi timeout larni tozalaymiz
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+    }
+    if (stopTypingTimeout) {
+        clearTimeout(stopTypingTimeout);
+    }
+
+    // 0.5 sekunddan keyin typing to'xtatish signalini yuboramiz
+    typingTimeout = setTimeout(() => {
+        const stopMsg = JSON.stringify({
+            'type': 'typing',
+            'chat_id': activeChat.id,
+            'is_typing': false
+        });
+        ws.send(stopMsg);
+    }, 500);
 }
+
 
 async function onConfigChange(config) {
     $('#appTitle').text(config.app_title || defaultConfig.app_title);
@@ -583,6 +873,30 @@ function addIncomingMessage(chatId, text, fromUserId) {
     renderChatList();
 }
 
+function updateLastMessageStatus(action) {
+    // Oxirgi yuborilgan (sent) xabarni topamiz
+    const lastMessage = document.querySelector(
+        '.message.sent:last-of-type .message-time'
+    );
+
+    if (!lastMessage) return;
+    // loading-spinner ni olib tashlaymiz
+    const spinner = lastMessage.querySelector('.loading-spinner');
+    if (spinner) spinner.remove();
+    console.log('spinner yoq');
+
+    // Agar status yo‘q bo‘lsa qo‘shamiz
+    if (!lastMessage.querySelector('.message-status')) {
+        const status = document.createElement('span');
+        status.className = 'message-status';
+        status.textContent = action;
+        lastMessage.appendChild(status);
+    } else {
+        lastMessage.textContent = action;
+    }
+    console.log('last');
+}
+
 
 // WebSocket ulanish funksiyasi
 function connectWebSocket(token) {
@@ -604,14 +918,53 @@ function connectWebSocket(token) {
             return;
         }
 
-        if (data.type === "chat.message") {
+        if (data.type === "message") {
+            // Typing indikatorlarni yashiramiz
+            hideTypingIndicator(data.chat_id, data.from);
+            hideChatListTyping(data.chat_id);
+
             addIncomingMessage(
                 data.chat_id,
                 data.message,
                 data.from
             );
+            activeChat = window.activeChat
+            if (activeChat && (activeChat.id === data.chat_id || activeChat.id === data.from)) {
+                let msg = JSON.stringify({
+                    'type': 'action',
+                    'is_read': true,
+                    'chat_id': activeChat.id,
+                });
+                ws.send(msg);
+            }
+        } else if (data.type === 'edit_message') {
+            // Boshqa userdan edit kelganda
+
+            // updateEditedMessage(data.message_id, data.message);
+        } else if (data.type === 'action') {
+            let action = '✓';
+            if (data.is_read) {
+                action = '✓✓';
+                console.log('ichidagi');
+            }
+            updateLastMessageStatus(action);
+
+        } else if (data.type === 'typing') {
+            // Typing signal kelganda
+            if (data.is_typing) {
+                // Chat list da ko'rsatish
+                console.log('-----');
+                console.log(data);
+                showChatListTyping(data.chat_id, data.from);
+                // Chat ichida ko'rsatish
+                showTypingIndicator(data.chat_id, data.from);
+                console.log('-----');
+            } else {
+                // Yashirish
+                hideChatListTyping(data.chat_id);
+                hideTypingIndicator(data.chat_id, data.from);
+            }
         }
-        // Bu yerda chatga real-time xabar qo‘shish mumkin
     };
 
     ws.onclose = () => {
@@ -767,50 +1120,30 @@ $(document).ready(function () {
         }
     });
 
-    // Enable/disable send button
+    // Input event listener (yangilangan)
     $('#messageInput').on('input', function () {
         const hasContent = $(this).val().trim().length > 0;
         $('#sendButton').prop('disabled', !hasContent);
 
-        // Clear previous timeout
-        if (typingTimeout) {
-            clearTimeout(typingTimeout);
-        }
-
-        // Set new timeout
         if (hasContent) {
             handleTyping();
-            typingTimeout = setTimeout(() => {
-                // Stop typing indicator after 2 seconds
-            }, 2000);
+        } else {
+            // Bo'sh bo'lsa, typing to'xtatish
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+            }
+            if (stopTypingTimeout) {
+                clearTimeout(stopTypingTimeout);
+            }
+            if (ws && window.activeChat) {
+                const stopMsg = JSON.stringify({
+                    'type': 'typing',
+                    'chat_id': window.activeChat.id,
+                    'is_typing': false
+                });
+                ws.send(stopMsg);
+            }
         }
     });
 
-    // Initialize Elements SDK
-    if (window.elementSdk) {
-        window.elementSdk.init({
-            defaultConfig: defaultConfig,
-            onConfigChange: onConfigChange,
-            mapToCapabilities: (config) => ({
-                recolorables: [], borderables: [], fontEditable: undefined, fontSizeable: undefined
-            }),
-            mapToEditPanelValues: (config) => new Map([["app_title", config.app_title || defaultConfig.app_title], ["search_placeholder", config.search_placeholder || defaultConfig.search_placeholder], ["online_status_text", config.online_status_text || defaultConfig.online_status_text], ["offline_status_text", config.offline_status_text || defaultConfig.offline_status_text], ["typing_indicator_text", config.typing_indicator_text || defaultConfig.typing_indicator_text], ["send_button_text", config.send_button_text || defaultConfig.send_button_text]])
-        });
-    }
-
-    // // Simulate receiving a message after 5 seconds
-    // setTimeout(() => {
-    //     if (activeChat && activeChat.id === 1) {
-    //         const newMessage = {
-    //             id: Date.now(),
-    //             message: "I'd love to hear more about it!",
-    //             fromUserId: 2,
-    //             is_read: false,
-    //             is_edited: false,
-    //             createdAt: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
-    //         };
-    //         sampleMessages[1].push(newMessage);
-    //         renderMessages(1);
-    //     }
-    // }, 5000);
 });

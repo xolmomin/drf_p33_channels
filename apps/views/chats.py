@@ -1,3 +1,4 @@
+from django.template.context_processors import request
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.filters import SearchFilter
@@ -59,7 +60,9 @@ class UserListAPIView(ListAPIView):
     search_fields = '^username',
 
     def filter_queryset(self, queryset):
-        return super().filter_queryset(queryset)[:3]
+        user = self.request.user
+        qs = super().filter_queryset(queryset)
+        return qs.exclude(id=user.id)[:3]
 
 
 @extend_schema(tags=['Chats'])

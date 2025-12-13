@@ -18,6 +18,20 @@ class Chat(CreatedBaseModel):
     def __str__(self):
         return self.name
 
+    @property
+    def last_message(self):
+        return self.messages.first()
+
+    @property
+    def unread_count(self):
+        return self.messages.filter(is_read=False).count()
+
+    @property
+    def last_message_time(self):
+        if msg:=self.messages.first():
+            return msg.created_at
+        return None
+
     @staticmethod
     def create_group(initiator_user):
         """Yangi guruh chatini yaratadi (mavjudligini tekshirmaydi)."""
@@ -91,3 +105,6 @@ class Message(CreatedBaseModel):
 
     def __str__(self):
         return self.message[:20]
+
+    class Meta:
+        ordering = '-created_at',
