@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from rest_framework.exceptions import ValidationError
@@ -16,9 +17,17 @@ class UserModelSerializer(ModelSerializer):
 
 
 class UserProfileUpdateModelSerializer(ModelSerializer):
+    username = CharField(max_length=120)
+
     class Meta:
         model = User
         fields = 'id', 'first_name', 'last_name', 'birth_date', 'bio', 'image', 'username'
+
+    def validate_username(self, value: str):
+        value = re.sub(r"[^a-z]", "", value.lower())
+        if User.objects.filter(username=value).exists():
+            raise ValidationError({'message': 'username already exists'})
+        return value
 
 
 class SendCodeSerializer(Serializer):

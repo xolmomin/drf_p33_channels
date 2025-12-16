@@ -23,12 +23,8 @@ class Chat(CreatedBaseModel):
         return self.messages.first()
 
     @property
-    def unread_count(self):
-        return self.messages.filter(is_read=False).count()
-
-    @property
     def last_message_time(self):
-        if msg:=self.messages.first():
+        if msg := self.messages.first():
             return msg.created_at
         return None
 
@@ -48,17 +44,11 @@ class Chat(CreatedBaseModel):
         # 1. Shaxsiy chat mavjudligini tekshirish:
         # Chat turi 'PRIVATE' bo'lishi,
         # va chat a'zolari orasida user1 va user2 lar bo'lishi shart.
-        existing_chat = Chat.objects.filter(
-            type=Chat.Type.PRIVATE,
-            members=user1
-        ).filter(
-            members=user2
-        ).annotate(
+
+        existing_chat = Chat.objects.filter(type=Chat.Type.PRIVATE, members__in=[user1, user2]).annotate(
             # Ixtiyoriy: Faqat 2 ta a'zosi borligini tekshirish (aniqlik uchun)
-            member_count=Count('members')
-        ).filter(
-            member_count=2
-        ).first()
+            member_count=Count('members', distinct=True)
+        ).filter(member_count=2).exists()
 
         if existing_chat:
             return existing_chat, False  # Chat topildi

@@ -1,19 +1,18 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import IntegerField, CharField, DateTimeField
+from rest_framework.fields import IntegerField, CharField, DateTimeField, SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
 from apps.models import Chat, User, Message
 
 
 class ChatListModelSerializer(ModelSerializer):
-    unread_count = IntegerField(read_only=True)
     is_online = IntegerField(default=False, read_only=True)
     last_message = CharField(read_only=True)
     last_message_time = DateTimeField(read_only=True, format='%H:%M:%S')
 
     class Meta:
         model = Chat
-        fields = 'id', 'name', 'type', 'image', 'unread_count', 'is_online', 'last_message', 'last_message_time'
+        fields = 'id', 'name', 'type', 'image', 'is_online', 'last_message', 'last_message_time'
         read_only_fields = ['image']
 
     def to_representation(self, instance: Chat):
@@ -28,6 +27,7 @@ class ChatListModelSerializer(ModelSerializer):
                 repr['image'] = None
             repr['name'] = second_user.full_name
             repr['is_online'] = second_user.is_online
+        repr['unread_count'] = instance.messages.filter(is_read=False).exclude(from_user_id=current_user).count()
         return repr
 
 
@@ -52,10 +52,16 @@ class ChatCreateModelSerializer(ModelSerializer):
 class UserListModelSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = 'id', 'username', 'first_name', 'last_name', 'image'
+        fields = 'id', 'username', 'first_name', 'last_name', 'image', 'is_online'
 
 
 class MessageListModelSerializer(ModelSerializer):
+    unread_count = SerializerMethodField(read_only=True)
+
     class Meta:
         model = Message
         fields = '__all__'
+
+    def get_unread_count(self, obj: Message):
+        return 2
+        # return Message.objects.filter(is_read=False).count()

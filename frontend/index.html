@@ -61,6 +61,17 @@
                     </div>
 
                 </div>
+
+                <!-- Three dots menu -->
+                <div class="chat-options">
+                    <button id="callButton" class="call-btn" title="Call">📞</button> <!-- Qo'ng'iroq tugmasi -->
+                    <button id="chatOptionsBtn" class="options-btn">⋮</button>
+
+                    <div id="chatOptionsMenu" class="options-menu hidden">
+                        <div class="options-item" id="clearChat">🧹 Clear Chat</div>
+                        <div class="options-item danger" id="deleteChat">🗑️ Delete Chat</div>
+                    </div>
+                </div>
             </div>
 
             <div class="messages-container" id="messagesContainer">
@@ -133,6 +144,7 @@
                         <label for="username">Username</label>
                         <input type="text" id="username">
                     </div>
+                    <div class="error-text" id="usernameError"></div>
                     <div class="form-group">
                         <label for="bio">Bio</label>
                         <input type="text" id="bio" value="Web Developer | Coffee Enthusiast"
@@ -142,6 +154,11 @@
                 </form>
             </div>
         </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="ws-notification" class="ws-notification hidden">
+        ⚠️ No connection
     </div>
 
     <!-- Logout Modal -->

@@ -1,14 +1,29 @@
-from django.template.context_processors import request
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import ListCreateAPIView, ListAPIView, RetrieveDestroyAPIView, \
+    DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.models import Chat, User, Message
 from apps.serializers import MessageListModelSerializer, ChatListModelSerializer, ChatCreateModelSerializer, \
     UserListModelSerializer
+
+
+@extend_schema(tags=['Chats'])
+class ChatClearAPIView(DestroyAPIView):
+    queryset = Chat.objects.all()
+    permission_classes = IsAuthenticated,
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return qs.filter(members=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance: Chat = self.get_object()
+        instance.messages.all().delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @extend_schema(tags=['Chats'])
@@ -41,7 +56,7 @@ class ChatListCreateAPIView(ListCreateAPIView):
 
 
 @extend_schema(tags=['Chats'])
-class ChatRetrieveAPIView(RetrieveAPIView):
+class ChatRetrieveDestroyAPIView(RetrieveDestroyAPIView):
     queryset = Chat.objects.all()
     serializer_class = ChatListModelSerializer
     permission_classes = IsAuthenticated,
@@ -74,4 +89,6 @@ class MessageListAPIView(ListAPIView):
     def get_queryset(self):
         qs = super().get_queryset()
         chat_id = self.kwargs.get('chat_id')
-        return qs.filter(chat_id=chat_id)
+        qs = qs.filter(chat_id=chat_id)
+        qs.exclude(from_user_id=self.request.user).update(is_read=True)
+        return qs

@@ -14,7 +14,7 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
     @sync_to_async
     def get_user_chats(self):
         # Foydalanuvchi a'zo bo'lgan barcha chat ID larini olish
-        return list(self.from_user.chats.values_list('id', flat=True))
+        return list(self.from_user.chats.values('id', 'type'))
 
     @sync_to_async
     def read_last_msg(self, from_user_id, chat_id):
@@ -29,22 +29,24 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
         """
         hozirgi userning barcha chatlariga ulanish
         """
-        self.chats = await self.get_chats()
-        for group in self.chats:
-            await self.channel_layer.group_add(str(group), self.channel_name)
+        self.user_chats = await self.get_user_chats()
+        for chat in self.user_chats:
+            await self.channel_layer.group_add(str(chat['id']), self.channel_name)
 
     async def change_status(self, is_online=True):
         self.from_user.is_online = is_online
         await self.from_user.asave(update_fields=['is_online'])
-        # for chat in self.chats:
-        #     await self.channel_layer.group_send(
-        #         str(chat),
-        #         {
-        #             "type": "chat.message",
-        #             "chat_id": self.from_user.id,
-        #             "status": is_online,
-        #         }
-        #     )
+        for chat in self.user_chats:
+            if chat['type'] == 'private':
+                await self.channel_layer.group_send(
+                    str(chat['id']),
+                    {
+                        "type": "chat.status",
+                        "chat_id": chat['id'],
+                        "from": self.from_user.id,
+                        "status": is_online,
+                    }
+                )
 
     async def connect(self):
         self.from_user = self.scope['user']
@@ -59,8 +61,8 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
 
         # Foydalanuvchi kirganida uni o'zining barcha chat guruhlariga qo'shish
         self.user_chats = await self.get_user_chats()
-        for chat_id in self.user_chats:
-            await self.channel_layer.group_add(str(chat_id), self.channel_name)
+        for chat in self.user_chats:
+            await self.channel_layer.group_add(str(chat['id']), self.channel_name)
 
         await self.change_status(True)
 
@@ -85,12 +87,12 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
     #     await self.channel_layer.group_discard(self.chat_room, self.channel_name)
 
     async def disconnect(self, close_code):
-        # Disconnect bo'lganda guruhlardan chiqarish
-        for chat_id in getattr(self, 'user_chats', []):
-            await self.channel_layer.group_discard(str(chat_id), self.channel_name)
-
         if hasattr(self, 'from_user'):
             await self.change_status(False)
+
+        # Disconnect bo'lganda guruhlardan chiqarish
+        for chat in getattr(self, 'user_chats', []):
+            await self.channel_layer.group_discard(str(chat['id']), self.channel_name)
 
     async def receive_json(self, content, **kwargs):
 
@@ -149,17 +151,18 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
 
     async def chat_message(self, event):
         if self.from_user.id != event['from']:
-            event['type'] = 'message'
-            await self.send_json(event)
+            await self.send_json(event | {'type': 'message'})
         else:
             await self.send_json({"type": "action", "accepted": True})
 
     async def chat_action(self, event):
         if self.from_user.id != event['from']:
-            event['type'] = 'action'
-            await self.send_json(event)
+            await self.send_json(event | {'type': 'action'})
+
+    async def chat_status(self, event):
+        if self.from_user.id != event['from']:
+            await self.send_json(event | {'type': 'status'})
 
     async def chat_typing(self, event):
         if self.from_user.id != event['from']:
-            event['type'] = 'typing'
-            await self.send_json(event)
+            await self.send_json(event | {'type': 'typing'})

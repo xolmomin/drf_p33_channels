@@ -15,7 +15,7 @@ async function isValidToken(token) {
         }
         return true;
     } catch (error) {
-        alert('error')
+        console.log('error', error)
         return false
     }
 }
@@ -85,10 +85,10 @@ function renderChatList() {
                         </div>
                         <div class="chat-info">
                             <div class="chat-name">${chat.name}</div>
-                            <div class="chat-preview">${chat.last_message}</div>
+                            <div class="chat-preview">${chat.last_message || 'cleared chat'}</div>
                         </div>
                         <div class="chat-meta">
-                            <div class="chat-time">${chat.last_message_time}</div>
+                            <div class="chat-time">${chat.last_message_time || ''}</div>
                             ${chat.unread_count > 0 ? `<div class="unread-badge">${chat.unread_count}</div>` : ''}
                         </div>
                     </div>
@@ -119,11 +119,17 @@ function searchFromApi(query) {
 
     $.ajax({
         url: `${baseUrl}users`,   // API endpointingiz
-        method: 'GET', data: {search: query}, headers: {
+        method: 'GET',
+        data: {
+            search: query
+        },
+        headers: {
             'Authorization': `Bearer ${accessToken}`
-        }, success: function (res) {
+        },
+        success: function (res) {
             renderChatListFromUsers(res);
-        }, error: function (err) {
+        },
+        error: function (err) {
             console.error("Search error:", err);
         }
     });
@@ -289,7 +295,7 @@ function renderMessagesFromApi(chat) {
                     <div class="message-time">
                         ${msg.created_at}
                         ${editedLabel}
-                        ${msg.isSent ? '<span class="message-status">✓✓</span>' : ''}
+                        ${msg.isSent ? `<span class="message-status">✓${msg.is_read ? '✓' : ''}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -726,6 +732,7 @@ function renderChatListFromUsers(users) {
             <div class="chat-item" data-user-id="${user.id}">
                 <div class="chat-avatar">
                      ${avatarContent}
+                     ${user.is_online ? '<div class="online-indicator"></div>' : ''}
                 </div>
                 <div class="chat-info">
                     <div class="chat-name">${name}</div>
@@ -761,7 +768,7 @@ function performLogout() {
     // window.location.href = '/login';
 
     // For demo, show a message in console
-    alert('Logged out successfully! In a real app, you would be redirected to login page.');
+    console.log('Logged out successfully! In a real app, you would be redirected to login page.');
     localStorage.removeItem('access_token')
     window.location.href = 'register.html';
 }
@@ -816,10 +823,16 @@ function saveProfile(e) {
 
             // Agar kerak bo'lsa, settingsPageTitle ham yangilash:
             $('#settingsPageTitle').text(`${fullName} (${updatedUser.id})`);
+
+            // Show success message
+            $('#successMessage').addClass('show');
+            setTimeout(() => {
+                $('#successMessage').removeClass('show');
+            }, 3000);
+
         })
         .catch(error => {
             console.error('Error updating profile:', error);
-            alert('Profilni yangilashda xatolik yuz berdi.');
         });
 
 
@@ -827,11 +840,6 @@ function saveProfile(e) {
     const initials = fullName.split(' ').map(n => n[0]).join('');
     $('#profileAvatarLarge').text(initials);
 
-    // Show success message
-    $('#successMessage').addClass('show');
-    setTimeout(() => {
-        $('#successMessage').removeClass('show');
-    }, 3000);
 }
 
 function addIncomingMessage(chatId, text, fromUserId) {
@@ -883,7 +891,6 @@ function updateLastMessageStatus(action) {
     // loading-spinner ni olib tashlaymiz
     const spinner = lastMessage.querySelector('.loading-spinner');
     if (spinner) spinner.remove();
-    console.log('spinner yoq');
 
     // Agar status yo‘q bo‘lsa qo‘shamiz
     if (!lastMessage.querySelector('.message-status')) {
@@ -894,7 +901,6 @@ function updateLastMessageStatus(action) {
     } else {
         lastMessage.textContent = action;
     }
-    console.log('last');
 }
 
 
@@ -941,11 +947,44 @@ function connectWebSocket(token) {
             // Boshqa userdan edit kelganda
 
             // updateEditedMessage(data.message_id, data.message);
+        } else if (data.type === 'status') {
+            const chatId = data.chat_id;
+            const isOnline = data.status;
+
+            // sampleChats ichidan chatni topamiz
+            const chat = sampleChats.find(c => c.id === chatId);
+            if (!chat) return;
+            // Chat modelini yangilash
+            chat.is_online = isOnline;
+
+            // Chat list UI yangilash
+            const chatItem = $(`.chat-item[data-chat-id="${chatId}"]`);
+            if (chatItem.length) {
+                const avatar = chatItem.find('.chat-avatar');
+
+                if (isOnline) {
+                    if (!avatar.find('.online-indicator').length) {
+                        avatar.append('<div class="online-indicator"></div>');
+                    }
+                } else {
+                    avatar.find('.online-indicator').remove();
+                }
+            }
+
+            // Agar ayni chat ochiq bo‘lsa — header statusni ham yangilash
+            if (window.activeChat && window.activeChat.id === chatId) {
+                const config = window.elementSdk?.config || defaultConfig;
+                $('#activeChatStatus').text(
+                    isOnline
+                        ? config.online_status_text
+                        : config.offline_status_text
+                );
+            }
+
         } else if (data.type === 'action') {
             let action = '✓';
             if (data.is_read) {
                 action = '✓✓';
-                console.log('ichidagi');
             }
             updateLastMessageStatus(action);
 
@@ -953,12 +992,9 @@ function connectWebSocket(token) {
             // Typing signal kelganda
             if (data.is_typing) {
                 // Chat list da ko'rsatish
-                console.log('-----');
-                console.log(data);
                 showChatListTyping(data.chat_id, data.from);
                 // Chat ichida ko'rsatish
                 showTypingIndicator(data.chat_id, data.from);
-                console.log('-----');
             } else {
                 // Yashirish
                 hideChatListTyping(data.chat_id);
@@ -967,13 +1003,26 @@ function connectWebSocket(token) {
         }
     };
 
+    const notification = document.getElementById("ws-notification");
+
+    function showNotification() {
+        notification.classList.remove("hidden");
+        notification.classList.add("show");
+    }
+
+    function hideNotification() {
+        notification.classList.remove("show");
+        notification.classList.add("hidden");
+    }
+
     ws.onclose = () => {
         console.log("WebSocket disconnected.");
-        // Istasa reconnect funksiyasi yozish mumkin
+        showNotification();
     };
 
     ws.onerror = (error) => {
         console.error("WebSocket error:", error);
+        showNotification();
     };
 
     return ws;
@@ -1144,6 +1193,78 @@ $(document).ready(function () {
                 ws.send(stopMsg);
             }
         }
+    });
+
+
+    // Toggle menu
+    $("#chatOptionsBtn").on("click", function (e) {
+        e.stopPropagation();
+        $("#chatOptionsMenu").toggleClass("hidden");
+    });
+
+    // Close menu on outside click
+    $(document).on("click", function () {
+        $("#chatOptionsMenu").addClass("hidden");
+    });
+
+    // Clear chat
+    $("#clearChat").on("click", function () {
+        let activeChatId = window.activeChat.id;
+
+        if (!activeChatId) return;
+
+        $.ajax({
+            url: `${baseUrl}chats/${activeChatId}/clear`,
+            method: "DELETE",
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            success: function (response) {
+                $("#messagesContainer").empty();
+                $("#chatOptionsMenu").addClass("hidden");
+            },
+            error: function () {
+                alert("Failed to clear chat");
+            }
+        });
+    });
+
+
+    // Delete chat
+    $("#deleteChat").on("click", function () {
+        let activeChatId = window.activeChat.id;
+
+        if (!activeChatId) return;
+
+        if (!confirm("Are you sure you want to delete this chat?")) return;
+
+        $.ajax({
+            url: `${baseUrl}chats/${activeChatId}`,
+            method: "DELETE",
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            },
+            success: function (response) {
+                // UI reset
+                $("#messagesContainer").empty();
+                $("#activeChatArea").hide();
+                $("#emptyState").show();
+
+                // chat listdan ham olib tashlash (ixtiyoriy)
+                $(`.chat-item[data-chat-id="${activeChatId}"]`).remove();
+
+                $("#chatOptionsMenu").addClass("hidden");
+            },
+            error: function () {
+                alert("Failed to delete chat");
+            }
+        });
+    });
+
+    $('#callButton').on('click', function () {
+        const activeChatName = $('#activeChatName').text().trim();
+        alert(`Calling ${activeChatName}...`);
+        // Bu yerda qo'ng'iroq funksiyasini chaqirishingiz mumkin
     });
 
 });

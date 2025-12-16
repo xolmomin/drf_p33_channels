@@ -3,7 +3,7 @@ from django.urls import path
 from apps.views import UserListAPIView, CustomTokenVerifyView, CustomTokenRefreshView, ChatListCreateAPIView, \
     SendCodeAPIView, VerifyCodeAPIView, UserProfileRetrieveUpdateAPIView, \
     UserDeleteAccountDestroyAPIView
-from apps.views.chats import ChatRetrieveAPIView, MessageListAPIView
+from apps.views.chats import ChatRetrieveDestroyAPIView, MessageListAPIView, ChatClearAPIView
 
 urlpatterns = [
     # Auth & User
@@ -16,7 +16,8 @@ urlpatterns = [
 
     # Chats
     path('chats', ChatListCreateAPIView.as_view(), name='chat_list_create'),
-    path('chats/<int:pk>', ChatRetrieveAPIView.as_view(), name='chat_detail'),
+    path('chats/<int:pk>/clear', ChatClearAPIView.as_view(), name='chat_detail'),
+    path('chats/<int:pk>', ChatRetrieveDestroyAPIView.as_view(), name='chat_detail'),
     path('users', UserListAPIView.as_view(), name='user_list'),
     path('chats/<int:chat_id>/messages', MessageListAPIView.as_view(), name='chat_message_list'),
 ]
