@@ -1065,3 +1065,103 @@ body {
 .call-btn:hover {
     color: #3b82f6; /* Tailwind primary blue */
 }
+
+.call-interface {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.call-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.call-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.call-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.mute-btn {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.end-call-btn {
+    background: #ff4757;
+}
+
+.incoming-call-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    z-index: 2000;
+    text-align: center;
+    min-width: 300px;
+}
+
+.incoming-call-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+    animation: ring 1s infinite;
+}
+
+@keyframes ring {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.incoming-call-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.accept-call-btn, .reject-call-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.accept-call-btn {
+    background: #2ecc71;
+    color: white;
+}
+
+.reject-call-btn {
+    background: #e74c3c;
+    color: white;
+}

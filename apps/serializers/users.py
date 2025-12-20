@@ -2,12 +2,15 @@ import re
 from typing import Any
 
 from rest_framework.exceptions import ValidationError
-from rest_framework.fields import CharField, IntegerField
+from rest_framework.fields import IntegerField, CharField
 from rest_framework.serializers import Serializer, ModelSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken
+from rest_framework_simplejwt.tokens import UntypedToken, RefreshToken
 
 from apps.models import User
 from apps.utils import check_phone, normalize_phone
+from root import settings
 
 
 class UserModelSerializer(ModelSerializer):
@@ -73,3 +76,22 @@ class VerifyCodeSerializer(Serializer):
 
     # first_name = CharField(max_length=255, default='Alijon')
     # last_name = CharField(max_length=255, default='Valiyev', allow_blank=True)
+
+
+class CustomTokenVerifySerializer(Serializer):
+    token = CharField(write_only=True)
+
+    def validate(self, attrs):
+        token = UntypedToken(attrs["token"])
+        user_id = token.get('user_id')
+        if not User.objects.filter(id=user_id).exists():
+            raise ValidationError({'message': 'invalid or expired token'})
+        if (
+                api_settings.BLACKLIST_AFTER_ROTATION
+                and "rest_framework_simplejwt.token_blacklist" in settings.INSTALLED_APPS
+        ):
+            jti = token.get(api_settings.JTI_CLAIM)
+            if BlacklistedToken.objects.filter(token__jti=jti).exists():
+                raise ValidationError("Token is blacklisted")
+
+        return {}

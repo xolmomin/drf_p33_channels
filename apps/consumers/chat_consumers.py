@@ -49,7 +49,7 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
                 )
 
     async def connect(self):
-        self.from_user = self.scope['user']
+        self.from_user: User = self.scope['user']
 
         if not self.from_user.is_authenticated:
             await self.accept()
@@ -94,10 +94,52 @@ class ChatConsumer(CustomAsyncJsonWebsocketConsumer):
         for chat in getattr(self, 'user_chats', []):
             await self.channel_layer.group_discard(str(chat['id']), self.channel_name)
 
+    # --- VOICE CHAT SIGNALING ---
+    async def handle_voice_message(self, content):
+        """Voice chat signaling xabarlarini qayta ishlash"""
+        msg_type = content.get('type')
+
+        # Target ID ni aniqlash (chat_id yoki to_user_id dan keladi)
+        target_id = content.get('to_user_id') or content.get('chat_id')
+
+        if not target_id:
+            return
+
+        # Signal ma'lumotlarini tayyorlash
+        signal_data = {
+            'type': msg_type,
+            'from': self.from_user.id,
+            'full_name': getattr(self.from_user, 'full_name', f"User {self.from_user.id}")
+        }
+
+        # Payload ni qo'shish
+        if 'offer' in content: signal_data['offer'] = content['offer']
+        if 'answer' in content: signal_data['answer'] = content['answer']
+        if 'candidate' in content: signal_data['candidate'] = content['candidate']
+
+        # Xabarni chat guruhiga yuborish
+        await self.channel_layer.group_send(
+            str(target_id),
+            {
+                'type': 'voice.broadcast',
+                'data': signal_data
+            }
+        )
+
+    async def voice_broadcast(self, event):
+        """Voice signalni o'zidan tashqari barchaga yuborish"""
+        if self.from_user.id != event['data']['from']:
+            await self.send_json(event['data'])
+
     async def receive_json(self, content, **kwargs):
+        if content.get('type') in ['voice_call_offer', 'voice_call_answer',
+                                   'voice_ice_candidate', 'voice_call_end',
+                                   'voice_call_reject']:
+            await self.handle_voice_message(content)
+            return
 
         self.chat_id = content['chat_id']
-        self.chat = await Chat.objects.filter(id=self.chat_id).afirst()
+        self.chat = await Chat.objects.filter(id=self.chat_id, members=self.from_user).afirst()
 
         if self.chat_id is None or self.chat is None:
             _user = await User.objects.filter(id=self.chat_id).afirst()

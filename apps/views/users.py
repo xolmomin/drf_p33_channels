@@ -1,13 +1,15 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.generics import UpdateAPIView, DestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import DestroyAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 
 from apps.models import User
-from apps.serializers import UserProfileUpdateModelSerializer, SendCodeSerializer, VerifyCodeSerializer
+from apps.serializers import UserProfileUpdateModelSerializer, SendCodeSerializer, VerifyCodeSerializer, \
+    CustomTokenVerifySerializer
 from apps.utils import send_code
 
 
@@ -51,9 +53,21 @@ class CustomTokenRefreshView(TokenRefreshView):
     pass
 
 
+
+
 @extend_schema(tags=['Auth & Users'])
 class CustomTokenVerifyView(TokenVerifyView):
-    pass
+    serializer_class = CustomTokenVerifySerializer
+
+    def post(self, request, *args, **kwargs) -> Response:
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0]) from e
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 @extend_schema(tags=['Auth & Users'])

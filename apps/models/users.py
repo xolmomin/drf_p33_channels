@@ -28,3 +28,9 @@ class User(AbstractUser):
         if self.last_name:
             return self.first_name + ' ' + self.last_name
         return self.first_name
+
+    def save(self, *, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.phone.startswith('998') and len(self.phone) == 12:
+            self.phone = self.phone.replace('998', '')
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+

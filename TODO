@@ -54,10 +54,14 @@ keyingi darsda
 5. pytest
 6. daphne, gunicorn, uvicorn
 
+Websocket
+HTTP, TCP, UDP
+ws (http + tcp)
 
 call, video call
 
-10.30.5.16:3000/frontend/index.html
+http://10.30.3.163:3000
+
 
 
 100 - 901001010

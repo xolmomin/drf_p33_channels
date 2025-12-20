@@ -488,6 +488,403 @@ async function openChat(chatId) {
     $('#messageInput').focus();
 }
 
+
+// Voice Chat Module - WebRTC Integration
+
+class VoiceChatManager {
+    constructor() {
+        this.peerConnections = new Map();
+        this.pendingOffers = new Map();  // ← QO'SHISH
+        this.localStream = null;
+        this.isCallActive = false;
+        this.currentCallUserId = null;
+        this.durationInterval = null;      // ✅ QO'SHISH
+        this.incomingCallTimeoutId = null; // ✅ QO'SHISH
+        this.iceServers = {
+            iceServers: [
+                {urls: 'stun:stun.l.google.com:19302'},
+                {urls: 'stun:stun1.l.google.com:19302'}
+            ]
+        };
+    }
+
+    // Mikrofonni ishga tushirish
+    async startMicrophone() {
+        try {
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
+            console.log('Microphone started');
+            return this.localStream;
+        } catch (error) {
+            console.error('Microphone error:', error);
+            alert('Mikrofonni ishga tushurib bo\'lmadi');
+            return null;
+        }
+    }
+
+    // Mikrofonni yopish
+    stopMicrophone() {
+        if (this.localStream) {
+            this.localStream.getTracks().forEach(track => track.stop());
+            this.localStream = null;
+        }
+    }
+
+    // Qo'ng'iroqni boshlash (Caller)
+    async initiateCall(targetChatId, targetUserName) {
+        if (this.isCallActive) return;
+
+        const stream = await this.startMicrophone();
+        if (!stream) return;
+
+        this.currentCallUserId = targetChatId;
+        const pc = new RTCPeerConnection(this.iceServers);
+        this.peerConnections.set(targetChatId, pc);
+
+        stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+        pc.onicecandidate = (event) => {
+            if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    type: 'voice_ice_candidate',
+                    to_user_id: targetChatId,
+                    candidate: event.candidate
+                }));
+            }
+        };
+
+        pc.ontrack = (event) => {
+            console.log('Remote track received');
+            this.playRemoteAudio(event.streams[0]);
+        };
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        ws.send(JSON.stringify({
+            type: 'voice_call_offer',
+            chat_id: targetChatId,
+            offer: offer
+        }));
+
+        this.showCallInterface(targetUserName, true);
+        this.isCallActive = true;
+    }
+
+    // Qo'ng'iroqni qabul qilish
+    async answerCall(fromUserId, offer) {
+        this.currentCallUserId = fromUserId;
+
+        // Mikrofonni ishga tushirish
+        const stream = await this.startMicrophone();
+        if (!stream) return;
+
+        // WebRTC ulanish
+        const peerConnection = new RTCPeerConnection(this.iceServers);
+        this.peerConnections.set(fromUserId, peerConnection);
+
+        // Local stream ni qo'shish
+        stream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, stream);
+        });
+
+        // ICE candidates
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                ws.send(JSON.stringify({
+                    type: 'voice_ice_candidate',
+                    to_user_id: fromUserId,
+                    candidate: event.candidate
+                }));
+            }
+        };
+
+        // Remote stream
+        peerConnection.ontrack = (event) => {
+            this.playRemoteAudio(event.streams[0]);
+        };
+
+        // Offer ni set qilish
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+        // Answer yaratish
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        // Signal yuborish
+        ws.send(JSON.stringify({
+            type: 'voice_call_answer',
+            to_user_id: fromUserId,
+            answer: answer
+        }));
+
+        this.isCallActive = true;
+    }
+
+    // Offer qabul qilish
+    async handleOffer(fromUserId, fullName, offer) {
+        // Incoming call notification
+        this.pendingOffers.set(fromUserId, offer);  // ← SAQLASH
+        this.showIncomingCallNotification(fromUserId, fullName, offer);
+    }
+
+    // Answer qabul qilish
+    async handleAnswer(fromUserId, answer) {
+        const peerConnection = this.peerConnections.get(fromUserId);
+        if (peerConnection) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        }
+    }
+
+    // ICE candidate qabul qilish
+    async handleIceCandidate(fromUserId, candidate) {
+        const peerConnection = this.peerConnections.get(fromUserId);
+        if (peerConnection && candidate) {
+            try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (error) {
+                console.error('ICE candidate error:', error);
+            }
+        }
+    }
+
+    // Remote audio ni eshitish
+    playRemoteAudio(stream) {
+        const audioElement = document.getElementById('remoteAudio');
+        if (audioElement) {
+            audioElement.srcObject = stream;
+            audioElement.play();
+        }
+    }
+
+    // Qo'ng'iroqni to'xtatish
+    endCall() {
+        // ← SIGNAL BIRINCHI
+        if (this.currentCallUserId && ws?.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                type: 'voice_call_end',
+                to_user_id: this.currentCallUserId
+            }));
+        }
+
+        // ← KEYIN RESET
+        this.peerConnections.forEach(pc => pc.close());
+        this.peerConnections.clear();
+        this.pendingOffers.clear();
+        this.stopMicrophone();
+        this.hideCallInterface();
+
+        this.isCallActive = false;
+        this.currentCallUserId = null;
+    }
+
+    // Qo'ng'iroqni rad qilish
+    rejectCall() {
+        if (this.currentCallUserId) {
+            ws.send(JSON.stringify({
+                type: 'voice_call_reject',
+                to_user_id: this.currentCallUserId
+            }));
+        }
+        this.endCall();  // Qo'ng'iroqni tugatish
+    }
+
+    // Incoming call UI
+    showIncomingCallNotification(fromUserId, FullName, offer) {
+        const notification = document.createElement('div');
+        notification.className = 'incoming-call-notification';
+        notification.innerHTML = `
+      <div class="incoming-call-content">
+        <div class="incoming-call-icon">📞</div>
+        <div class="incoming-call-text">
+          <p>Incoming voice call...</p>
+          <p id="callerName">${FullName} ${fromUserId}</p>
+        </div>
+        <div class="incoming-call-buttons">
+          <button class="accept-call-btn" 
+                  onclick="voiceChat.acceptCall(${fromUserId})">
+            ✓ Accept
+          </button>
+          <button class="reject-call-btn" 
+                  onclick="voiceChat.rejectCall()">
+            ✕ Reject
+          </button>
+        </div>
+      </div>
+    `;
+
+        document.body.appendChild(notification);
+
+        // 30 sekunddan keyin avtomatik rad qilish
+        setTimeout(() => {
+            if (notification.parentElement) {
+                this.rejectCall();
+                notification.remove();
+            }
+        }, 30000);
+    }
+
+    // UI interfeysini ko'rsatish
+    showCallInterface(userName, isInitiator) {
+        let callUI = document.getElementById('callInterface');
+
+        // Agar interfeys hali yo'q bo'lsa, yaratamiz
+        if (!callUI) {
+            callUI = document.createElement('div');
+            callUI.id = 'callInterface';
+            callUI.className = 'call-interface';
+            document.body.appendChild(callUI);
+        }
+
+        // HTML tarkibini joylashtiramiz
+        callUI.innerHTML = `
+        <div class="call-header">
+          <span id="callUserName">${userName}</span>
+          <span id="callDuration">00:00</span>
+        </div>
+        <div class="call-controls">
+          <button id="muteBtn" class="call-btn">🔊</button>
+          <button id="endCallBtn" class="call-btn end-call-btn">📞</button>
+        </div>
+    `;
+        callUI.style.display = 'flex';
+
+        // Xatolikni oldini olish: Elementlarni innerHTML dan keyin topamiz
+        const endBtn = callUI.querySelector('#endCallBtn');
+        const muteBtn = callUI.querySelector('#muteBtn');
+
+        if (endBtn) {
+            endBtn.onclick = () => this.endCall();
+        }
+
+        if (muteBtn) {
+            let isMuted = false;
+            muteBtn.onclick = (e) => {
+                isMuted = !isMuted;
+                if (this.localStream) {
+                    this.localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+                }
+                e.target.textContent = isMuted ? '🔇' : '🔊';
+            };
+        }
+
+        // Taymerni boshlash
+        if (this.durationInterval) clearInterval(this.durationInterval);
+        let seconds = 0;
+        const durationDisplay = callUI.querySelector('#callDuration');
+
+        this.durationInterval = setInterval(() => {
+            seconds++;
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            if (durationDisplay) {
+                durationDisplay.textContent =
+                    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+            }
+        }, 1000);
+    }
+
+    // Call interface yashirish
+    hideCallInterface() {
+        const callUI = document.getElementById('callInterface');
+        if (callUI) {
+            callUI.style.display = 'none';
+        }
+    }
+
+    // Incoming call qabul qilish
+    async acceptCall(fromUserId) {
+        const notification = document.querySelector('.incoming-call-notification');
+        if (notification) {
+            notification.remove();
+        }
+
+        if (this.incomingCallTimeoutId) {
+            clearTimeout(this.incomingCallTimeoutId);
+            this.incomingCallTimeoutId = null;
+        }
+
+        const offer = this.pendingOffers.get(fromUserId);
+        if (!offer) {
+            console.error('No pending offer found');
+            return;
+        }
+
+        await this.answerCall(fromUserId, offer);
+        this.showCallInterface(`User ${fromUserId}`, false);
+    }
+}
+
+// Global voice chat instance
+let voiceChat = null;
+
+// WebSocket message handler update
+function handleVoiceMessage(data) {
+    if (!voiceChat) {
+        voiceChat = new VoiceChatManager();
+    }
+
+    switch (data.type) {
+        // 📤 Caller dan offer keldi
+        case 'voice_call_offer':
+            voiceChat.handleOffer(
+                data.from,
+                data.full_name,
+                data.offer
+            );
+            break;
+
+        // ✅ Callee dan answer keldi
+        case 'voice_call_answer':
+            voiceChat.handleAnswer(data.from, data.answer);
+            break;
+
+        // 🌐 ICE candidate (NAT traversal)
+        case 'voice_ice_candidate':
+            voiceChat.handleIceCandidate(data.from, data.candidate);
+            break;
+
+        // 🛑 Qo'ng'iroq tugadi
+        case 'voice_call_end':
+            voiceChat.endCall();
+            break;
+
+        // ❌ Qo'ng'iroq rad qilindi
+        case 'voice_call_reject':
+            voiceChat.endCall();
+            break;
+    }
+}
+
+// Call button event listener (index.js da)
+function initVoiceChat() {
+    voiceChat = new VoiceChatManager();
+
+    $('#callButton').off('click').on('click', async function () {
+        const activeChat = window.activeChat;
+        if (!activeChat || !voiceChat) return;
+
+        if (!voiceChat.isCallActive) {
+            // 🔴 QONG'IROQ BOSHLASH
+            const userName = $('#activeChatName').text().trim();
+            await voiceChat.initiateCall(activeChat.id, userName);
+        } else {
+            // ✅ QONG'IROQNI TUGATISH
+            voiceChat.endCall();
+        }
+    });
+}
+
+// Initialization
+setTimeout(() => {
+    initVoiceChat();  // 500ms keyin
+}, 500);
+
 // function openChat(chatId) {
 //     activeChat = sampleChats.find(c => c.id === chatId);
 //     if (!activeChat) return;
@@ -1000,6 +1397,8 @@ function connectWebSocket(token) {
                 hideChatListTyping(data.chat_id);
                 hideTypingIndicator(data.chat_id, data.from);
             }
+        } else if (data.type?.startsWith('voice_')) {
+            handleVoiceMessage(data);
         }
     };
 
@@ -1093,6 +1492,9 @@ $(document).ready(function () {
             connectWebSocket(accessToken);   // Chatlar yuklangandan keyin WS ulanish
         });
 
+        setTimeout(() => {
+            initVoiceChat();  // Voice chat initialization
+        }, 500);
     } else {
         // Token yo'q bo'lsa, ro'yxatdan o'tish sahifasiga yo'naltirish
         window.location.href = 'register.html';
@@ -1268,3 +1670,5 @@ $(document).ready(function () {
     });
 
 });
+
+

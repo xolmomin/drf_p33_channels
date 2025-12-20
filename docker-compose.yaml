@@ -1,0 +1,4 @@
+backend_service (http - gunicorn, ws - daphne)
+front_service
+postgres_service
+redis_service

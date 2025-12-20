@@ -45,6 +45,7 @@ class Chat(CreatedBaseModel):
         # Chat turi 'PRIVATE' bo'lishi,
         # va chat a'zolari orasida user1 va user2 lar bo'lishi shart.
 
+
         existing_chat = Chat.objects.filter(type=Chat.Type.PRIVATE, members__in=[user1, user2]).annotate(
             # Ixtiyoriy: Faqat 2 ta a'zosi borligini tekshirish (aniqlik uchun)
             member_count=Count('members', distinct=True)
