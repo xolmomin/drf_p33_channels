@@ -19,7 +19,6 @@ class UUIDBaseModel(Model):
 
     class Meta:
         abstract = True
-        required_db_vendor = 'postgresql'
 
 
 class CreatedBaseModel(Model):

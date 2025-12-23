@@ -1,4 +1,47 @@
-backend_service (http - gunicorn, ws - daphne)
-front_service
-postgres_service
-redis_service
+services:
+  backend_service:
+    build: .
+    command: >
+      uv run gunicorn root.wsgi:application --timeout 120 --bind 0.0.0.0:8000
+    env_file:
+      - .env.prod
+    depends_on:
+      - postgres_service
+      - redis_service
+    ports:
+      - "8000:8000"
+
+  backend_ws_service:
+    build: .
+    command: >
+      uv run daphne -b 0.0.0.0 -p 8001 root.asgi:application
+    env_file:
+      - .env.prod
+    depends_on:
+      - postgres_service
+      - redis_service
+    ports:
+      - "8001:8001"
+
+  nginx_service:
+    build: ./frontend
+    restart: always
+    depends_on:
+      - backend_service
+      - backend_ws_service
+    ports:
+      - "80:80"
+
+  postgres_service:
+    image: postgres:alpine
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+
+  redis_service:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
